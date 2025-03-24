@@ -2,7 +2,7 @@
 
 # Tecnologias que hay que tener para levantar el proyecto
 
-- **Node.js**
+- **Node.js** v22
 - **PostgreSQL**
 
 ## Instalación
@@ -48,7 +48,10 @@ El servidor estará corriendo en http://localhost:3000 (puedes cambiar el puerto
 
 # Migraciones
 
-Para aplicar las migraciones de la base de datos, ejecuta:
+Para aplicar las migraciones de la base de datos,
+
+1. Primero crear una db llamda db_api_administracion
+2. ejecuta:
 
 ```bash
  npm run migrations:run
