@@ -25,8 +25,19 @@ const ServiciosSchema = {
 };
 
 class Servicios extends Model {
-  static associate() {
-    //relaciones
+  static associate(models) {
+    this.hasMany(models.Movimiento, {
+      as: 'movimientos',
+      foreignKey: 'id_servicio',
+    });
+    this.hasMany(models.Alerta, {
+      as: 'alertas',
+      foreignKey: 'id_servicio',
+    });
+    this.hasMany(models.Orden, {
+      as: 'ordenes',
+      foreignKey: 'id_servicio',
+    });
   }
 
   static config(sequelize) {

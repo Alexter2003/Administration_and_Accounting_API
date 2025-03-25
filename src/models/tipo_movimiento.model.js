@@ -25,8 +25,11 @@ const TipoMovimientoSchema = {
 };
 
 class TipoMovimiento extends Model {
-  static associate() {
-    //relaciones
+  static associate(models) {
+    this.hasMany(models.Movimiento, {
+      as: 'movimientos',
+      foreignKey: 'id_tipo_movimiento',
+    });
   }
 
   static config(sequelize) {
