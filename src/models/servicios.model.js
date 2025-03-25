@@ -24,7 +24,7 @@ const ServiciosSchema = {
   },
 };
 
-class Servicios extends Model {
+class Servicio extends Model {
   static associate(models) {
     this.hasMany(models.Movimiento, {
       as: 'movimientos',
@@ -53,5 +53,5 @@ class Servicios extends Model {
 module.exports = {
   SERVICIOS_TABLE,
   ServiciosSchema,
-  Servicios,
+  Servicio,
 };
