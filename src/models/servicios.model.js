@@ -44,7 +44,7 @@ class Servicio extends Model {
     return {
       sequelize,
       tableName: SERVICIOS_TABLE,
-      modelName: 'Servicios',
+      modelName: 'Servicio',
       timestamps: false,
     };
   }
