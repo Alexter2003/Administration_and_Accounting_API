@@ -19,31 +19,34 @@ const AlertaSchema = {
     type: DataTypes.STRING(255),
   },
   id_servicio: {
-    allowNull: true,
+    allowNull: false,
     type: DataTypes.INTEGER,
     references: {
       model: SERVICIOS_TABLE,
       key: 'id',
     },
     onUpdate: 'CASCADE',
-    onDelete: 'SET NULL',
   },
   created_at: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.DATE,
     field: 'created_at',
     defaultValue: DataTypes.NOW,
   },
   updated_at: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.DATE,
     field: 'updated_at',
+    defaultValue: DataTypes.NOW,
   },
 };
 
 class Alerta extends Model {
   static associate(models) {
-    this.belongsTo(models.Servicio, {});
+    this.belongsTo(models.Servicio, {
+      as: 'servicio',
+      foreignKey: 'id_servicio',
+    });
   }
 
   static config(sequelize) {
