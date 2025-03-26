@@ -62,11 +62,13 @@ const MovimientoSchema = {
   created_at: {
     allowNull: true,
     type: DataTypes.DATE,
+    field: 'created_at',
     defaultValue: DataTypes.NOW,
   },
   updated_at: {
     allowNull: true,
     type: DataTypes.DATE,
+    field: 'updated_at',
     defaultValue: DataTypes.NOW,
   },
 };
