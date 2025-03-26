@@ -12,14 +12,14 @@ const MovimientoSchema = {
     type: DataTypes.INTEGER,
   },
   id_tipo_movimiento: {
-    allowNull: true,
+    allowNull: false,
     type: DataTypes.INTEGER,
     references: {
       model: TIPO_MOVIMIENTO_TABLE,
       key: 'id',
     },
     onUpdate: 'CASCADE',
-    onDelete: 'SET NULL',
+    onDelete: 'RESTRICT',
   },
   id_servicio: {
     allowNull: true,
@@ -37,7 +37,7 @@ const MovimientoSchema = {
   },
   cantidad: {
     allowNull: false,
-    type: DataTypes.DOUBLE,
+    type: DataTypes.DECIMAL(10, 2),
   },
   fecha_movimiento: {
     allowNull: false,
