@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Sequelize } = require('sequelize');
 const { SERVICIOS_TABLE } = require('./servicios.model');
 const { ESTADO_ORDEN_TABLE } = require('./estado_orden.model');
 const { PROVEEDORES_TABLE } = require('./proveedores.model');
@@ -54,13 +54,13 @@ const OrdenesSchema = {
     allowNull: true,
     type: DataTypes.DATE,
     field: 'created_at',
-    defaultValue: DataTypes.NOW,
+    defaultValue: Sequelize.NOW,
   },
   updated_at: {
     allowNull: true,
     type: DataTypes.DATE,
     field: 'updated_at',
-    defaultValue: DataTypes.NOW,
+    defaultValue: Sequelize.NOW,
   },
 };
 
@@ -89,7 +89,6 @@ class Orden extends Model {
       sequelize,
       tableName: ORDENES_TABLE,
       modelName: 'Orden',
-      timestamps: true,
     };
   }
 }
