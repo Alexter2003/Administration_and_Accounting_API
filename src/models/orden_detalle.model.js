@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Sequelize } = require('sequelize');
 const { ORDENES_TABLE } = require('./orden.model');
 const { ESTADO_DETALLE_TABLE } = require('./estado_detalle.model');
 
@@ -43,17 +43,14 @@ const OrdenDetalleSchema = {
     allowNull: false,
     type: DataTypes.DECIMAL(10, 2),
   },
-  created_at: {
+  createdAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'created_at',
-    defaultValue: DataTypes.NOW,
+    defaultValue: Sequelize.NOW,
   },
-  updated_at: {
+  updateAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'updated_at',
-    defaultValue: DataTypes.NOW,
   },
 };
 

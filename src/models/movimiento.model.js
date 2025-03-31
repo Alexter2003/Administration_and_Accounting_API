@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Sequelize } = require('sequelize');
 const { TIPO_MOVIMIENTO_TABLE } = require('./tipo_movimiento.model');
 const { SERVICIOS_TABLE } = require('./servicios.model');
 
@@ -59,17 +59,14 @@ const MovimientoSchema = {
     allowNull: false,
     type: DataTypes.BOOLEAN,
   },
-  created_at: {
+  createdAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'created_at',
-    defaultValue: DataTypes.NOW,
+    defaultValue: Sequelize.NOW,
   },
-  updated_at: {
+  updatedAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'updated_at',
-    defaultValue: DataTypes.NOW,
   },
 };
 

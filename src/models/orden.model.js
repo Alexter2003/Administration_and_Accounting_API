@@ -50,17 +50,14 @@ const OrdenesSchema = {
     allowNull: false,
     type: DataTypes.DECIMAL(10, 2),
   },
-  created_at: {
+  createdAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'created_at',
     defaultValue: Sequelize.NOW,
   },
-  updated_at: {
+  updatedAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'updated_at',
-    defaultValue: Sequelize.NOW,
   },
 };
 
@@ -89,6 +86,7 @@ class Orden extends Model {
       sequelize,
       tableName: ORDENES_TABLE,
       modelName: 'Orden',
+      timestamps: true,
     };
   }
 }

@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Sequelize } = require('sequelize');
 
 const ESTADO_ORDEN_TABLE = 'estados_orden';
 
@@ -17,17 +17,14 @@ const EstadoOrdenSchema = {
     allowNull: true,
     type: DataTypes.STRING(255),
   },
-  created_at: {
+  createdAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'created_at',
-    defaultValue: DataTypes.NOW,
+    defaultValue: Sequelize.NOW,
   },
-  updated_at: {
+  updatedAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'updated_at',
-    defaultValue: DataTypes.NOW,
   },
 };
 
