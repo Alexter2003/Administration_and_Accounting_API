@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Sequelize } = require('sequelize');
 const { SERVICIOS_TABLE } = require('./servicios.model');
 
 const ALERTA_TABLE = 'alertas';
@@ -27,17 +27,19 @@ const AlertaSchema = {
     },
     onUpdate: 'CASCADE',
   },
-  created_at: {
-    allowNull: true,
-    type: DataTypes.DATE,
-    field: 'created_at',
-    defaultValue: DataTypes.NOW,
+  estado: {
+    allowNull: false,
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
   },
-  updated_at: {
+  createdAt: {
     allowNull: true,
     type: DataTypes.DATE,
-    field: 'updated_at',
-    defaultValue: DataTypes.NOW,
+    defaultValue: Sequelize.NOW,
+  },
+  updatedAt: {
+    allowNull: true,
+    type: DataTypes.DATE,
   },
 };
 
