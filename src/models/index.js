@@ -1,6 +1,7 @@
 const { AlertaSchema, Alerta } = require('./alerta.model');
 const { EstadoOrden } = require('./estado_orden.model');
 const { Movimiento, MovimientoSchema } = require('./movimiento.model');
+const { Orden, OrdenesSchema } = require('./orden.model');
 const { Proveedor, ProveedoresSchema } = require('./proveedores.model');
 const { Servicio, ServiciosSchema } = require('./servicios.model');
 const {
@@ -15,6 +16,7 @@ function setupModels(sequelize) {
   Movimiento.init(MovimientoSchema, Movimiento.config(sequelize));
   Alerta.init(AlertaSchema, Alerta.config(sequelize));
   Proveedor.init(ProveedoresSchema, Proveedor.config(sequelize));
+  Orden.init(OrdenesSchema, Orden.config(sequelize));
 
   //definir las asociaciones
   Servicio.associate(sequelize.models);
@@ -23,6 +25,7 @@ function setupModels(sequelize) {
   Alerta.associate(sequelize.models);
   EstadoOrden.associate(sequelize.models);
   Proveedor.associate(sequelize.models);
+  Orden.associate(sequelize.models);
 }
 
 module.exports = setupModels;
