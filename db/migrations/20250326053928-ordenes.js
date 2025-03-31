@@ -3,7 +3,7 @@
 const {
   ORDENES_TABLE,
   OrdenesSchema,
-} = require('../../src/models/ordenes.model');
+} = require('../../src/models/orden.model');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
