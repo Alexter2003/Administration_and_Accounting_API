@@ -10,14 +10,14 @@ const EmpleadoSchema = {
     type: DataTypes.INTEGER,
   },
   id_jornada: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.INTEGER,
     references: {
       model: 'jornadas',
       key: 'id',
     },
     onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT',
+    onDelete: 'SET NULL',
   },
   dpi: {
     allowNull: false,
