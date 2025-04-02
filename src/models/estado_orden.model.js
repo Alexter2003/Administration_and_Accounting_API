@@ -1,4 +1,4 @@
-const { Model, DataTypes, Sequelize } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
 const ESTADO_ORDEN_TABLE = 'estados_orden';
 
@@ -17,15 +17,6 @@ const EstadoOrdenSchema = {
     allowNull: true,
     type: DataTypes.STRING(255),
   },
-  createdAt: {
-    allowNull: true,
-    type: DataTypes.DATE,
-    defaultValue: Sequelize.NOW,
-  },
-  updatedAt: {
-    allowNull: true,
-    type: DataTypes.DATE,
-  },
 };
 
 class EstadoOrden extends Model {
@@ -41,7 +32,7 @@ class EstadoOrden extends Model {
       sequelize,
       tableName: ESTADO_ORDEN_TABLE,
       modelName: 'EstadoOrden',
-      timestamps: true,
+      timestamps: false,
     };
   }
 }

@@ -1,4 +1,4 @@
-const { Model, DataTypes, Sequelize } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
 const PROVEEDORES_TABLE = 'proveedores';
 
@@ -30,15 +30,6 @@ const ProveedoresSchema = {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
-  createdAt: {
-    allowNull: true,
-    type: DataTypes.DATE,
-    defaultValue: Sequelize.NOW,
-  },
-  updatedAt: {
-    allowNull: true,
-    type: DataTypes.DATE,
-  },
 };
 
 class Proveedor extends Model {
@@ -54,7 +45,7 @@ class Proveedor extends Model {
       sequelize,
       tableName: PROVEEDORES_TABLE,
       modelName: 'Proveedor',
-      timestamps: true,
+      timestamps: false,
     };
   }
 }
