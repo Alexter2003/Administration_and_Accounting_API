@@ -1,4 +1,5 @@
 const { AlertaSchema, Alerta } = require('./alerta.model');
+const { Areas, AreasSchema } = require('./areas.model');
 const {
   EstadoDetalle,
   EstadoDetalleSchema,
@@ -25,6 +26,7 @@ function setupModels(sequelize) {
   EstadoDetalle.init(EstadoDetalleSchema, EstadoDetalle.config(sequelize));
   Orden.init(OrdenesSchema, Orden.config(sequelize));
   OrdenDetalle.init(OrdenDetalleSchema, OrdenDetalle.config(sequelize));
+  Areas.init(AreasSchema, Areas.config(sequelize));
 
   //definir las asociaciones
   Servicio.associate(sequelize.models);
@@ -36,6 +38,7 @@ function setupModels(sequelize) {
   Proveedor.associate(sequelize.models);
   Orden.associate(sequelize.models);
   OrdenDetalle.associate(sequelize.models);
+  Areas.associate(sequelize.models);
 }
 
 module.exports = setupModels;
