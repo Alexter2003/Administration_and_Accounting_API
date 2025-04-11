@@ -53,6 +53,15 @@ const EmpleadoSchema = {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  usuario: {
+    allowNull: false,
+    type: DataTypes.STRING(50),
+    unique: true,
+  },
+  password: {
+    allowNull: false,
+    type: DataTypes.STRING(255),
+  },
   createdAt: {
     allowNull: true,
     type: DataTypes.DATE,
