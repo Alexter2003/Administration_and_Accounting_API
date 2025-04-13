@@ -56,11 +56,13 @@ class EmpleadoAsignacion extends Model {
       as: 'empleado',
       foreignKey: 'id_empleado',
     });
+
     this.belongsTo(models.Rol, {
       as: 'rol',
       foreignKey: 'id_rol',
     });
-    this.belongsTo(models.Area, {
+
+    this.belongsTo(models.Areas, {
       as: 'area',
       foreignKey: 'id_area',
     });
