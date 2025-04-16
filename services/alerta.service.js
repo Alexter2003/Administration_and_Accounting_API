@@ -59,6 +59,10 @@ class AlertaService {
       if (!alerta) {
         throw boom.notFound('Alerta no encontrada');
       }
+
+      if (!alerta.estado) {
+        throw boom.notFound('Alerta desactivada');
+      }
       return alerta;
     } catch (error) {
       throw boom.badRequest(error);
