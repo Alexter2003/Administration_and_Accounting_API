@@ -26,6 +26,9 @@ class AlertaService {
           estado: true,
         },
       });
+      if (alertas.length < 1) {
+        throw boom.notFound('No hay alertas activas');
+      }
       return {
         message: 'Alertas activas encontradas correctamente',
         data: alertas,
@@ -61,6 +64,22 @@ class AlertaService {
       throw boom.badRequest(error);
     }
   }
+
+  async delete(id) {
+    try {
+      const alerta = await models.Alerta.findByPk(id);
+      if (!alerta) {
+        throw boom.notFound('Alerta no encontrada');
+      }
+      await alerta.update({ estado: false });
+      return {
+        message: 'Alerta eliminada correctamente',
+      };
+    } catch (error) {
+      throw boom.badRequest(error);
+    }
+  }
+
 }
 
 module.exports = AlertaService;
