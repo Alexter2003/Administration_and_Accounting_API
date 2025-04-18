@@ -4,8 +4,8 @@ const proveedorRouter = require('./routers/proveedores.router');
 function routerApi(app) {
   const router = express.Router();
   app.use('/api/administracion', router);
-  router.use('/alertas', alertaRouter);
-  router.use('/proveedores', proveedorRouter);
+  router.use(alertaRouter);
+  router.use(proveedorRouter);
 }
 
 module.exports = routerApi;
