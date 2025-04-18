@@ -22,6 +22,7 @@ class ProveedorService {
         where: {
           estado: true,
         },
+        order: [['id', 'ASC']],
       });
       if (proveedores.length < 1) {
         throw boom.notFound('No hay proveedores activos');
