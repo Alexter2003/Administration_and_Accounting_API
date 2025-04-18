@@ -1,18 +1,18 @@
 info:
-  title: Administration and Accounting API
-  description: API for managing alerts and providers in the system
+  title: API de Administración y Contabilidad
+  description: API para la gestión de alertas y proveedores en el sistema
   version: 1.0.0
 servers:
   - url: http://localhost:3000
-    description: Development server
+    description: Servidor de desarrollo
 paths:
   /GET/alertas:
     get:
-      summary: Get all alerts
-      description: Retrieve a list of all active alerts in the system
+      summary: Obtener todas las alertas
+      description: Obtiene una lista de todas las alertas activas en el sistema
       responses:
         '200':
-          description: List of alerts retrieved successfully
+          description: Lista de alertas obtenida exitosamente
           content:
             application/json:
               schema:
@@ -33,7 +33,7 @@ paths:
                         estado:
                           type: boolean
         '404':
-          description: No active alerts found
+          description: No se encontraron alertas activas
           content:
             application/json:
               schema:
@@ -48,8 +48,8 @@ paths:
 
   /GET/alertas/{id}:
     get:
-      summary: Get alert by ID
-      description: Retrieve a specific alert by its ID
+      summary: Obtener alerta por ID
+      description: Obtiene una alerta específica por su ID
       parameters:
         - name: id
           in: path
@@ -58,7 +58,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Alert found successfully
+          description: Alerta encontrada exitosamente
           content:
             application/json:
               schema:
@@ -78,12 +78,12 @@ paths:
                       nombre:
                         type: string
         '404':
-          description: Alert not found
+          description: Alerta no encontrada
 
   /POST/alertas/tienda_de_conveniencia:
     post:
-      summary: Create convenience store alert
-      description: Create a new alert for the convenience store
+      summary: Crear alerta de tienda de conveniencia
+      description: Crea una nueva alerta para la tienda de conveniencia
       requestBody:
         required: true
         content:
@@ -93,9 +93,10 @@ paths:
               properties:
                 nombre_producto:
                   type: string
+                  description: Nombre del producto con bajo stock
       responses:
         '201':
-          description: Alert created successfully
+          description: Alerta creada exitosamente
           content:
             application/json:
               schema:
@@ -103,13 +104,14 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Alerta creada correctamente"
                   data:
                     type: object
 
   /POST/alertas/gasolinera:
     post:
-      summary: Create gas station alert
-      description: Create a new alert for the gas station
+      summary: Crear alerta de gasolinera
+      description: Crea una nueva alerta para la gasolinera
       requestBody:
         required: true
         content:
@@ -119,14 +121,25 @@ paths:
               properties:
                 nombre_producto:
                   type: string
+                  description: Nombre del producto con bajo stock
       responses:
         '201':
-          description: Alert created successfully
+          description: Alerta creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Alerta creada correctamente"
+                  data:
+                    type: object
 
   /POST/alertas/repuestos:
     post:
-      summary: Create spare parts alert
-      description: Create a new alert for spare parts
+      summary: Crear alerta de repuestos
+      description: Crea una nueva alerta para el servicio de repuestos
       requestBody:
         required: true
         content:
@@ -136,14 +149,25 @@ paths:
               properties:
                 nombre_producto:
                   type: string
+                  description: Nombre del producto con bajo stock
       responses:
         '201':
-          description: Alert created successfully
+          description: Alerta creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Alerta creada correctamente"
+                  data:
+                    type: object
 
   /POST/alertas/pintura:
     post:
-      summary: Create painting service alert
-      description: Create a new alert for the painting service
+      summary: Crear alerta de servicio de pintura
+      description: Crea una nueva alerta para el servicio de pintura
       requestBody:
         required: true
         content:
@@ -153,14 +177,25 @@ paths:
               properties:
                 nombre_producto:
                   type: string
+                  description: Nombre del producto con bajo stock
       responses:
         '201':
-          description: Alert created successfully
+          description: Alerta creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Alerta creada correctamente"
+                  data:
+                    type: object
 
   /PATCH/alertas/{id}:
     patch:
-      summary: Delete alert
-      description: Mark an alert as deleted (inactive)
+      summary: Eliminar alerta
+      description: Marca una alerta como eliminada (inactiva)
       parameters:
         - name: id
           in: path
@@ -169,7 +204,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Alert deleted successfully
+          description: Alerta eliminada exitosamente
           content:
             application/json:
               schema:
@@ -181,11 +216,11 @@ paths:
 
   /GET/proveedores:
     get:
-      summary: Get all providers
-      description: Retrieve a list of all active providers
+      summary: Obtener todos los proveedores
+      description: Obtiene una lista de todos los proveedores activos
       responses:
         '200':
-          description: List of providers retrieved successfully
+          description: Lista de proveedores obtenida exitosamente
           content:
             application/json:
               schema:
@@ -199,12 +234,12 @@ paths:
                     items:
                       type: object
         '404':
-          description: No active providers found
+          description: No se encontraron proveedores activos
 
   /GET/proveedores/{id}:
     get:
-      summary: Get provider by ID
-      description: Retrieve a specific provider by its ID
+      summary: Obtener proveedor por ID
+      description: Obtiene un proveedor específico por su ID
       parameters:
         - name: id
           in: path
@@ -213,14 +248,14 @@ paths:
             type: integer
       responses:
         '200':
-          description: Provider found successfully
+          description: Proveedor encontrado exitosamente
         '404':
-          description: Provider not found
+          description: Proveedor no encontrado
 
   /POST/proveedores:
     post:
-      summary: Create provider
-      description: Create a new provider
+      summary: Crear proveedor
+      description: Crea un nuevo proveedor
       requestBody:
         required: true
         content:
@@ -229,7 +264,7 @@ paths:
               type: object
       responses:
         '201':
-          description: Provider created successfully
+          description: Proveedor creado exitosamente
           content:
             application/json:
               schema:
@@ -243,8 +278,8 @@ paths:
 
   /PUT/proveedores/{id}:
     put:
-      summary: Update provider
-      description: Update an existing provider
+      summary: Actualizar proveedor
+      description: Actualiza un proveedor existente
       parameters:
         - name: id
           in: path
@@ -259,7 +294,7 @@ paths:
               type: object
       responses:
         '200':
-          description: Provider updated successfully
+          description: Proveedor actualizado exitosamente
           content:
             application/json:
               schema:
@@ -273,8 +308,8 @@ paths:
 
   /PATCH/proveedores/{id}:
     patch:
-      summary: Delete provider
-      description: Mark a provider as deleted (inactive)
+      summary: Eliminar proveedor
+      description: Marca un proveedor como eliminado (inactivo)
       parameters:
         - name: id
           in: path
@@ -283,7 +318,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Provider deleted successfully
+          description: Proveedor eliminado exitosamente
           content:
             application/json:
               schema:
