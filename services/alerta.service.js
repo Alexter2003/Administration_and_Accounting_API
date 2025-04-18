@@ -25,6 +25,7 @@ class AlertaService {
         where: {
           estado: true,
         },
+        order: [['id', 'ASC']],
       });
       if (alertas.length < 1) {
         throw boom.notFound('No hay alertas activas');
