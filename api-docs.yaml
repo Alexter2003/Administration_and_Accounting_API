@@ -327,3 +327,4 @@ paths:
                   message:
                     type: string
                     example: "Proveedor desactivado correctamente"
+
