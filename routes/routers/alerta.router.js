@@ -15,28 +15,28 @@ router.get('/', (req, res, next) => alertaController.find(req, res, next));
 
 // Obtener una alerta por su id
 router.get(
-  '/:id',
+  'GET/:id',
   validatorHandler(getAlertaSchema, 'params'),
   (req, res, next) => alertaController.findOne(req, res, next)
 );
 
 // Crear una alerta de tienda de conveniencia
 router.post(
-  '/tienda_de_conveniencia',
+  'POST/tienda_de_conveniencia',
   validatorHandler(createAlertaSchema, 'body'),
   (req, res, next) => alertaController.create_tienda_alerta(req, res, next)
 );
 
 // Crear una alerta para gasolinera
 router.post(
-  '/gasolinera',
+  'POST/gasolinera',
   validatorHandler(createAlertaSchema, 'body'),
   (req, res, next) => alertaController.create_gasolinera_alerta(req, res, next)
 );
 
 //Crear una alerta para repuestos
 router.post(
-  '/repuestos',
+  'POST/repuestos',
   validatorHandler(createAlertaSchema, 'body'),
   (req, res, next) => alertaController.create_repuestos_alerta(req, res, next)
 );
@@ -49,7 +49,7 @@ router.post(
 );
 
 router.patch(
-  '/:id',
+  'PATCH/:id',
   validatorHandler(deleteAlertaSchema, 'params'),
   (req, res, next) => alertaController.delete_alerta(req, res, next)
 );
