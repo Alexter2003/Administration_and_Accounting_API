@@ -2,7 +2,7 @@ const express = require('express');
 const OrdenController = require('./../../src/controllers/orden.controller');
 const ordenController = new OrdenController();
 
-const { getOrdenSchema, createOrdenSchema } = require('./../../Schemas/orden.schema');
+const { getOrdenSchema, createOrdenSchema, updateOrdenSchema, updateDetalleSchema } = require('./../../Schemas/orden.schema');
 const validatorHandler = require('./../../middlewares/validator.handler');
 
 const router = express.Router();
@@ -20,6 +20,20 @@ router.get('/GET/ordenes/:id',
 router.post('/POST/ordenes',
   validatorHandler(createOrdenSchema, 'body'),
   (req, res, next) => ordenController.create(req, res, next)
+);
+
+//Actualizar estado de una orden
+router.put('/PUT/ordenes/modificar_estado/:id',
+  validatorHandler(getOrdenSchema, 'params'),
+  validatorHandler(updateOrdenSchema, 'body'),
+  (req, res, next) => ordenController.update(req, res, next)
+);
+
+//Actualizar estado de un detalle de orden
+router.put('/PUT/ordenes/detalle/:id',
+  validatorHandler(getOrdenSchema, 'params'),
+  validatorHandler(updateDetalleSchema, 'body'),
+  (req, res, next) => ordenController.updateDetalleEstado(req, res, next)
 );
 
 module.exports = router;

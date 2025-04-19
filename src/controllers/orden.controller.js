@@ -29,6 +29,26 @@ class OrdenController {
       next(error);
     }
   }
+
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const orden = await service.update(id, req.body);
+      res.status(200).json(orden);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateDetalleEstado(req, res, next) {
+    try {
+      const { id } = req.params;
+      const detalle = await service.updateDetalleEstado(id, req.body);
+      res.status(200).json(detalle);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = OrdenController;
