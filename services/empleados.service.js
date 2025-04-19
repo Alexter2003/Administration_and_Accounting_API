@@ -33,14 +33,19 @@ class EmpleadosService {
         // excluir de la respuesta:
         const empleadoData = newEmpleado.toJSON();
         delete empleadoData.password;
+        delete empleadoData.usuario;
         delete empleadoData.createdAt;
         delete empleadoData.updatedAt;
         return {
-            message: 'Empleado creado correctamente',
-            data: {
-              ...empleadoData,
-              contraseñaTemporal: password
-            }
+          message: 'Empleado creado correctamente',
+          datosEmpleado: {
+            ...empleadoData
+          },
+          autenticacion: "Brindar al empleado sus datos inicio de sesión:",
+          datosLogin: {
+            usuario: usuario,
+            contraseniaTemporal: password
+        }
         };
     } catch (error) {
         throw boom.badRequest(error.message);
