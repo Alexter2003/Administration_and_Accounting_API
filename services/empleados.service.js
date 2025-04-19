@@ -37,7 +37,10 @@ class EmpleadosService {
         delete empleadoData.updatedAt;
         return {
             message: 'Empleado creado correctamente',
-            data: empleadoData,
+            data: {
+              ...empleadoData,
+              contraseñaTemporal: password
+            }
         };
     } catch (error) {
         throw boom.badRequest(error.message);
