@@ -18,8 +18,8 @@ const deleteAreaSchema = joi.object({
 });
 
 const updateAreaSchema = joi.object({
-  nombre: nombre.required(),
-  descripcion: descripcion.required()
+  nombre: nombre,
+  descripcion: descripcion
 });
 
 module.exports = { getAreaSchema, createAreaSchema, deleteAreaSchema, updateAreaSchema };
