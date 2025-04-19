@@ -1,13 +1,23 @@
 const boom = require('@hapi/boom');
 const { models } = require('./../config/sequelize');
+const axios =  require('axios');
 
 class OrdenService {
-  constructor() {}
+  constructor() {
+    // Configuración de endpoints de reabastecimiento por servicio
+    this.reabastecimientoEndpoints = {
+      4: process.env.RESTOCK_SERVICE_1_URL || 'http://servicio1/api/restock',
+      5: process.env.RESTOCK_SERVICE_2_URL || 'http://servicio2/api/restock',
+      6: process.env.RESTOCK_SERVICE_3_URL || 'http://servicio3/api/restock',
+      7: process.env.RESTOCK_SERVICE_4_URL || 'http://servicio4/api/restock',
+    };
+  }
 
   async find(){
     try {
       const ordenes = await models.Orden.findAll({
-        order: [['idmodels', 'ASC']],
+        order: [['id', 'ASC']],
+
       });
       if (ordenes.length < 1) {
         throw boom.notFound('No hay ordenes');
@@ -26,7 +36,35 @@ class OrdenService {
 
   async findOne(id){
     try {
-      const orden = await models.Orden.findByPk(id);
+      const orden = await models.Orden.findByPk(id, {
+        attributes: {
+          exclude: ['id_estado_orden', 'id_servicio', 'id_proveedor'],
+        },
+        include: [
+          {
+            model: models.EstadoOrden,
+            as: 'estado_orden',
+          },
+          {
+            model: models.Servicio,
+            as: 'servicio',
+            attributes: {
+              exclude: ['descripcion', 'estado'],
+            },
+          },
+          {
+            model: models.Proveedor,
+            as: 'proveedor',
+            attributes: {
+              exclude: ['descripcion', 'estado'],
+            },
+          },
+          {
+            model: models.OrdenDetalle,
+            as: 'orden_detalles',
+          },
+        ],
+      });
       if (!orden) {
         throw boom.notFound('Orden no encontrada');
       }
@@ -86,6 +124,163 @@ class OrdenService {
       };
     } catch (error) {
       // Para caso de error se hace un rollback de la transacción
+      await transaction.rollback();
+
+      if (boom.isBoom(error)) {
+        throw error;
+      }
+      throw boom.internal(error);
+    }
+  }
+
+  async enviarSolicitudReabastecimiento(orden, detalles) {
+    try {
+      const endpoint = this.reabastecimientoEndpoints[orden.id_servicio];
+      if (!endpoint) {
+        throw boom.badRequest(`No hay endpoint de reabastecimiento configurado para el servicio ${orden.id_servicio}`);
+      }
+
+      // Datos para el reabastecimiento
+      const datosReabastecimiento = {
+        productos: detalles.map(detalle => ({
+          producto_id: detalle.id_producto,
+          cantidad: detalle.cantidad
+        }))
+      };
+
+      // Enviar solicitud al servicio de reabastecimiento
+      const response = await axios.post(endpoint, datosReabastecimiento);
+      return response.data;
+
+    } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
+      throw boom.badImplementation('Error al procesar solicitud de reabastecimiento' + error.response.data);
+    }
+  }
+
+  async update(id, changes) {
+    const transaction = await models.Orden.sequelize.transaction();
+    try {
+      const orden = await models.Orden.findByPk(id, {
+        include: [{
+          model: models.OrdenDetalle,
+          as: 'orden_detalles'
+        }]
+      });
+
+      if (!orden) {
+        throw boom.notFound('Orden no encontrada');
+      }
+
+      // Validar las transiciones de estado permitidas
+      const estadoActual = orden.id_estado_orden;
+      const nuevoEstado = changes.estado;
+
+      // Validar que el nuevo estado sea válido (1: Confirmada, 2: En Proceso, 3: Entregada, 4: Cancelada)
+      if (![1, 2, 3, 4].includes(nuevoEstado)) {
+        throw boom.badRequest('Estado de orden no válido');
+      }
+
+      // Validar transiciones permitidas
+      const transicionesPermitidas = {
+        1: [2, 4],     // De Confirmada puede pasar a En Proceso o Cancelada
+        2: [3, 4],     // De En Proceso puede pasar a Entregada o Cancelada
+        3: [],         // De Entregada no puede cambiar
+        4: [],         // De Cancelada no puede cambiar
+      };
+
+      if (!transicionesPermitidas[estadoActual].includes(nuevoEstado)) {
+        throw boom.badRequest('Transición de estado no permitida');
+      }
+
+      await orden.update({
+        id_estado_orden: nuevoEstado
+      }, { transaction });
+
+      // Si la orden pasa a estado "Entregada" (3), enviar solicitud de reabastecimiento y actualizar los detalles a estado 1 (Completo)
+      if (nuevoEstado === 3) {
+        // Actualizar todos los detalles a estado 1 (Completo)
+        await Promise.all(orden.orden_detalles.map(async (detalle) => {
+          await models.OrdenDetalle.update(
+            { id_estado_detalle: 1 },
+            {
+              where: { id: detalle.id },
+              transaction
+            }
+          );
+        }));
+
+        // Enviar solicitud de reabastecimiento
+        //const respuestaReabastecimiento = await this.enviarSolicitudReabastecimiento(orden, orden.orden_detalles);
+
+        await transaction.commit();
+
+        // Si fue cambio a estado 3, incluir la respuesta del reabastecimiento
+        if (nuevoEstado === 3) {
+          return {
+            message: 'Estado de orden actualizado correctamente y detalles actualizados',
+            // reabastecimiento: respuestaReabastecimiento
+          };
+        }
+      }
+
+      await transaction.commit();
+
+      // Respuesta normal para otros cambios de estado
+      return {
+        message: 'Estado de orden actualizado correctamente'
+      };
+
+    } catch (error) {
+      await transaction.rollback();
+
+      if (boom.isBoom(error)) {
+        throw error;
+      }
+      throw boom.internal(error);
+    }
+  }
+
+  async updateDetalleEstado(idDetalle, changes) {
+    const transaction = await models.OrdenDetalle.sequelize.transaction();
+    try {
+      // Buscar el detalle de la orden
+      const detalle = await models.OrdenDetalle.findByPk(idDetalle, {
+        include: [{
+          model: models.Orden,
+          as: 'orden',
+          attributes: ['id_estado_orden']
+        }]
+      });
+
+      if (!detalle) {
+        throw boom.notFound('Detalle de orden no encontrado');
+      }
+
+      // Verificar que la orden principal esté en estado 3 (Entregada)
+      if (detalle.orden.id_estado_orden !== 3) {
+        throw boom.badRequest('Solo se pueden modificar detalles de órdenes entregadas');
+      }
+
+      // Validar que el nuevo estado sea válido (1: Completo, 2: Incompleto, 3: No recibido)
+      const nuevoEstado = changes.estado;
+      if (![1, 2, 3].includes(nuevoEstado)) {
+        throw boom.badRequest('Estado de detalle no válido. Estados permitidos: 1 (Completo), 2 (Incompleto), 3 (No recibido)');
+      }
+
+      // Actualizar el estado del detalle
+      await detalle.update({
+        id_estado_detalle: nuevoEstado
+      }, { transaction });
+
+      await transaction.commit();
+
+      return {
+        message: 'Estado del detalle actualizado correctamente'
+      };
+    } catch (error) {
       await transaction.rollback();
 
       if (boom.isBoom(error)) {
