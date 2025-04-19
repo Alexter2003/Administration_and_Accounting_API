@@ -48,7 +48,8 @@ const OrdenDetalleSchema = {
     type: DataTypes.DATE,
     defaultValue: Sequelize.NOW,
   },
-  updateAt: {
+  updatedAt: {
+    field: 'updateAt',
     allowNull: true,
     type: DataTypes.DATE,
   },
@@ -60,9 +61,9 @@ class OrdenDetalle extends Model {
       as: 'orden',
       foreignKey: 'id_orden',
     });
-    this.belongsTo(models.EstadoOrden, {
-      as: 'estado_orden',
-      foreignKey: 'id_estado_orden',
+    this.belongsTo(models.EstadoDetalle, {
+      as: 'estado_detalle',
+      foreignKey: 'id_estado_detalle',
     });
   }
 
