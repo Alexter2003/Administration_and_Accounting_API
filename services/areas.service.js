@@ -35,6 +35,9 @@ class AreasService {
         data: areas
       };
     } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
       throw boom.badRequest(error);
     }
   }
@@ -58,6 +61,9 @@ class AreasService {
         data: area
       };
     } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
       throw boom.badRequest(error);
     }
   }
@@ -74,6 +80,9 @@ class AreasService {
         data: updatedArea
       };
     } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
       throw boom.badRequest(error);
     }
   }
@@ -89,6 +98,9 @@ class AreasService {
         message: 'Area eliminada correctamente'
       };
     } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
       throw boom.badRequest(error);
     }
   }
