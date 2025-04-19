@@ -35,6 +35,9 @@ class RolesService {
         data: roles,
       };
     } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
       throw boom.badRequest(error);
     }
   }
@@ -58,6 +61,9 @@ class RolesService {
         data: rol
       };
     } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
       throw boom.badRequest(error);
     }
   }
@@ -83,6 +89,9 @@ class RolesService {
         data: updatedRol,
       };
     } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
       throw boom.badRequest(error);
     }
   }
@@ -106,6 +115,9 @@ class RolesService {
         message: 'Rol eliminado correctamente',
       };
     } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
       throw boom.badRequest(error);
     }
   }
