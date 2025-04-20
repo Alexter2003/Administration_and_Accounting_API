@@ -24,11 +24,12 @@ async function validarCamposUnicos(data, excludeId = null) {
     }
   }
 
-  // Verificar si el NIT ya existe
-  if (data.nit) {
-    const existingNit = await models.Empleado.findOne({ where: { nit: data.nit } });
-    if (existingNit && existingNit.id !== excludeId) {
-      throw boom.conflict('El NIT ya está registrado');
+  // Verificar si el correo electrónico ya existe
+  if (data.email) {
+    const normalizedEmail = data.email.trim().toLowerCase(); // Normalizar el email
+    const existingEmail = await models.Empleado.findOne({ where: { email: normalizedEmail } });
+    if (existingEmail && existingEmail.id !== excludeId) {
+      throw boom.conflict('El correo electrónico ya está registrado');
     }
   }
 }

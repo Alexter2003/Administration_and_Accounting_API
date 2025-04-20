@@ -8,6 +8,7 @@ const telefono = joi.string().regex(/^[0-9]{8}$/);
 const direccion = joi.string().min(3).max(255);
 const nit = joi.string();
 const genero = joi.boolean();
+const email = joi.string().email().min(3).max(100);
 //const estado = joi.boolean();
 //const usuario = joi.string().min(3).max(50);
 //const password = joi.string().min(8).max(255);
@@ -25,6 +26,7 @@ const createEmpleadoSchema = joi.object({
   nit: nit.required(),
   genero: genero.required(),
   id_jornada: id_jornada.required(),
+  email: email.required(),
 });
 
 const updateEmpleadoSchema = joi.object({
@@ -36,6 +38,7 @@ const updateEmpleadoSchema = joi.object({
   nit: nit,
   genero: genero,
   id_jornada: id_jornada,
+  email: email,
 });
 
 const deleteEmpleadoSchema = joi.object({
