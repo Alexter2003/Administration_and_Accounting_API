@@ -156,7 +156,7 @@ class OrdenService {
       if (boom.isBoom(error)) {
         throw error;
       }
-      throw boom.badImplementation('Error al procesar solicitud de reabastecimiento' + error.response.data);
+      throw boom.badImplementation('Error al procesar solicitud de reabastecimiento' + error);
     }
   }
 
@@ -199,9 +199,8 @@ class OrdenService {
         id_estado_orden: nuevoEstado
       }, { transaction });
 
-      // Si la orden pasa a estado "Entregada" (3), enviar solicitud de reabastecimiento y actualizar los detalles a estado 1 (Completo)
+      // Si la orden pasa a estado "Entregada" (3), actualizar todos los detalles a Completo
       if (nuevoEstado === 3) {
-        // Actualizar todos los detalles a estado 1 (Completo)
         await Promise.all(orden.orden_detalles.map(async (detalle) => {
           await models.OrdenDetalle.update(
             { id_estado_detalle: 1 },
@@ -212,18 +211,10 @@ class OrdenService {
           );
         }));
 
-        // Enviar solicitud de reabastecimiento
-        //const respuestaReabastecimiento = await this.enviarSolicitudReabastecimiento(orden, orden.orden_detalles);
-
         await transaction.commit();
-
-        // Si fue cambio a estado 3, incluir la respuesta del reabastecimiento
-        if (nuevoEstado === 3) {
-          return {
-            message: 'Estado de orden actualizado correctamente y detalles actualizados',
-            // reabastecimiento: respuestaReabastecimiento
-          };
-        }
+        return {
+          message: 'Estado de orden actualizado correctamente y detalles actualizados'
+        };
       }
 
       await transaction.commit();
@@ -270,10 +261,20 @@ class OrdenService {
         throw boom.badRequest('Estado de detalle no válido. Estados permitidos: 1 (Completo), 2 (Incompleto), 3 (No recibido)');
       }
 
-      // Actualizar el estado del detalle
-      await detalle.update({
+      // Si el estado es 2 (Incompleto), actualizar también la cantidad
+      const updateData = {
         id_estado_detalle: nuevoEstado
-      }, { transaction });
+      };
+
+      if (nuevoEstado === 2) {
+        if (!changes.cantidad) {
+          throw boom.badRequest('Para marcar como incompleto, debe especificar la cantidad recibida');
+        }
+        updateData.cantidad = changes.cantidad;
+      }
+
+      // Actualizar el estado del detalle
+      await detalle.update(updateData, { transaction });
 
       await transaction.commit();
 
@@ -283,6 +284,49 @@ class OrdenService {
     } catch (error) {
       await transaction.rollback();
 
+      if (boom.isBoom(error)) {
+        throw error;
+      }
+      throw boom.internal(error);
+    }
+  }
+
+  async reabastecer(id) {
+    try {
+      // Buscar la orden con sus detalles
+      const orden = await models.Orden.findByPk(id, {
+        include: [{
+          model: models.OrdenDetalle,
+          as: 'orden_detalles'
+        }]
+      });
+
+      if (!orden) {
+        throw boom.notFound('Orden no encontrada');
+      }
+
+      // Verificar que la orden esté en estado 3 (Entregada)
+      if (orden.id_estado_orden !== 3) {
+        throw boom.badRequest('Solo se pueden reabastecer órdenes en estado Entregada');
+      }
+
+      // Filtrar solo los detalles que no están en estado 3 (No recibido)
+      const detallesParaReabastecer = orden.orden_detalles.filter(
+        detalle => detalle.id_estado_detalle !== 3
+      );
+
+      if (detallesParaReabastecer.length === 0) {
+        throw boom.badRequest('No hay productos para reabastecer en esta orden');
+      }
+
+      // Enviar solicitud de reabastecimiento solo con los productos recibidos
+      const respuestaReabastecimiento = await this.enviarSolicitudReabastecimiento(orden, detallesParaReabastecer);
+
+      return {
+        message: 'Solicitud de reabastecimiento procesada',
+        reabastecimiento: respuestaReabastecimiento
+      };
+    } catch (error) {
       if (boom.isBoom(error)) {
         throw error;
       }

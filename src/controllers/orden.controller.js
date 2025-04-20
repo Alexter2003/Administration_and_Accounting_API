@@ -49,6 +49,16 @@ class OrdenController {
       next(error);
     }
   }
+
+  async reabastecer(req, res, next) {
+    try {
+      const { id } = req.params;
+      const orden = await service.reabastecer(id);
+      res.status(200).json(orden);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = OrdenController;

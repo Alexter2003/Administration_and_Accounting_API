@@ -7,7 +7,7 @@ const id_proveedor = Joi.number().integer();
 const fecha_orden = Joi.date().min('now');
 //const costo_total = Joi.number().integer();
 const id_producto = Joi.number().integer();
-const cantidad = Joi.number().integer();
+const cantidad = Joi.number().integer().positive();
 const precio_unitario = Joi.number().integer();
 const estado_detalle = Joi.number().integer().valid(1, 2, 3);
 
@@ -32,13 +32,23 @@ const updateOrdenSchema = Joi.object({
 
 const updateDetalleSchema = Joi.object({
   estado: estado_detalle.required(),
+  cantidad: Joi.when('estado', {
+    is: 2,
+    then: cantidad.required(),
+    otherwise: Joi.forbidden()
+  })
+});
+
+const reabastecerOrdenSchema = Joi.object({
+  id: id.required()
 });
 
 module.exports = {
   getOrdenSchema,
   createOrdenSchema,
   updateOrdenSchema,
-  updateDetalleSchema
+  updateDetalleSchema,
+  reabastecerOrdenSchema
 };
 
 
