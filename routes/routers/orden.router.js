@@ -2,7 +2,7 @@ const express = require('express');
 const OrdenController = require('./../../src/controllers/orden.controller');
 const ordenController = new OrdenController();
 
-const { getOrdenSchema, createOrdenSchema, updateOrdenSchema, updateDetalleSchema } = require('./../../Schemas/orden.schema');
+const { getOrdenSchema, createOrdenSchema, updateOrdenSchema, updateDetalleSchema, reabastecerOrdenSchema } = require('./../../Schemas/orden.schema');
 const validatorHandler = require('./../../middlewares/validator.handler');
 
 const router = express.Router();
@@ -34,6 +34,12 @@ router.put('/PUT/ordenes/detalle/:id',
   validatorHandler(getOrdenSchema, 'params'),
   validatorHandler(updateDetalleSchema, 'body'),
   (req, res, next) => ordenController.updateDetalleEstado(req, res, next)
+);
+
+//Reabastecer una orden
+router.post('/POST/ordenes/reabastecer/:id',
+  validatorHandler(reabastecerOrdenSchema, 'params'),
+  (req, res, next) => ordenController.reabastecer(req, res, next)
 );
 
 module.exports = router;
