@@ -3,8 +3,34 @@ const { models } = require('./../config/sequelize');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
-function generateRandomPassword(length = 10) {
+function generarPasswordAleatoria(length = 10) {
   return crypto.randomBytes(length).toString('base64').slice(0, length);
+}
+
+async function validarCamposUnicos(data, excludeId = null) {
+  // Verificar si el DPI ya existe
+  if (data.dpi) {
+    const existingDpi = await models.Empleado.findOne({ where: { dpi: data.dpi } });
+    if (existingDpi && existingDpi.id !== excludeId) {
+      throw boom.conflict('El DPI ya está registrado');
+    }
+  }
+
+  // Verificar si el teléfono ya existe
+  if (data.telefono) {
+    const existingTelefono = await models.Empleado.findOne({ where: { telefono: data.telefono } });
+    if (existingTelefono && existingTelefono.id !== excludeId) {
+      throw boom.conflict('El teléfono ya está registrado');
+    }
+  }
+
+  // Verificar si el NIT ya existe
+  if (data.nit) {
+    const existingNit = await models.Empleado.findOne({ where: { nit: data.nit } });
+    if (existingNit && existingNit.id !== excludeId) {
+      throw boom.conflict('El NIT ya está registrado');
+    }
+  }
 }
 
 class EmpleadosService {
@@ -12,43 +38,42 @@ class EmpleadosService {
 
   async create(data) {
     try {
-        const firstName = data.nombres.split(' ')[0].toLowerCase();
-        const lastName = data.apellidos.split(' ')[0].toLowerCase();
-        const dpiSegment = `${data.dpi[0]}${data.dpi[1]}${data.dpi[7]}${data.dpi[8]}`;
+      await validarCamposUnicos(data);
 
-        // Generar el usuario con la convención: nombre.apellido.dpiSegment
-        const usuario = `${firstName}${lastName}.${dpiSegment}`;
+      // Generar usuario y contraseña
+      const firstName = data.nombres.split(' ')[0].toLowerCase();
+      const lastName = data.apellidos.split(' ')[0].toLowerCase();
+      const dpiSegment = `${data.dpi[0]}${data.dpi[1]}${data.dpi[7]}${data.dpi[8]}`;
+      const usuario = `${firstName}${lastName}.${dpiSegment}`;
+      const password = generarPasswordAleatoria();
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Generar una contraseña aleatoria
-        const password = generateRandomPassword();
-        const hashedPassword = await bcrypt.hash(password, 10); // Encripta la contraseña
+      const newEmpleado = await models.Empleado.create({
+        ...data,
+        usuario,
+        password: hashedPassword,
+      });
 
-        // Crear el empleado en la base de datos
-        const newEmpleado = await models.Empleado.create({
-            ...data,
-            usuario,
-            password: hashedPassword,
-        });
+      // Excluir datos de la respuesta
+      const empleadoData = newEmpleado.toJSON();
+      delete empleadoData.password;
+      delete empleadoData.usuario;
+      delete empleadoData.createdAt;
+      delete empleadoData.updatedAt;
 
-        // excluir de la respuesta:
-        const empleadoData = newEmpleado.toJSON();
-        delete empleadoData.password;
-        delete empleadoData.usuario;
-        delete empleadoData.createdAt;
-        delete empleadoData.updatedAt;
-        return {
-          message: 'Empleado creado correctamente',
-          datosEmpleado: {
-            ...empleadoData
-          },
-          autenticacion: "Brindar al empleado sus datos inicio de sesión:",
-          datosLogin: {
-            usuario: usuario,
-            contraseniaTemporal: password
-        }
-        };
+      return {
+        message: 'Empleado creado correctamente',
+        datosEmpleado: {
+          ...empleadoData,
+        },
+        autenticacion: 'Brindar al empleado sus datos inicio de sesión:',
+        datosLogin: {
+          usuario: usuario,
+          contraseniaTemporal: password,
+        },
+      };
     } catch (error) {
-        throw boom.badRequest(error.message);
+      throw boom.badRequest(error.message);
     }
   }
 
@@ -106,33 +131,32 @@ class EmpleadosService {
 
   async update(id, data) {
     try {
-        // Buscar el empleado por ID
-        const empleado = await models.Empleado.findByPk(id);
+      const empleado = await models.Empleado.findByPk(id);
+      if (!empleado) {
+        throw boom.notFound('Empleado no encontrado');
+      }
 
-        if (!empleado) {
-            throw boom.notFound('Empleado no encontrado');
-        }
+      await validarCamposUnicos(data, id);
 
-        // Encriptar la nueva contraseña si se proporciona
-        if (data.password) {
-            data.password = await bcrypt.hash(data.password, 10);
-        }
+      // Encriptar la nueva contraseña si se proporciona
+      if (data.password) {
+        data.password = await bcrypt.hash(data.password, 10);
+      }
 
-        // Actualizar el empleado
-        const updatedEmpleado = await empleado.update(data);
+      const updatedEmpleado = await empleado.update(data);
 
-        // excluir de la respuesta:
-        const empleadoData = updatedEmpleado.toJSON();
-        delete empleadoData.password;
-        delete empleadoData.createdAt;
-        delete empleadoData.updatedAt;
+      // Excluir datos sensibles de la respuesta
+      const empleadoData = updatedEmpleado.toJSON();
+      delete empleadoData.password;
+      delete empleadoData.createdAt;
+      delete empleadoData.updatedAt;
 
-        return {
-            message: 'Empleado actualizado correctamente',
-            data: empleadoData,
-        };
+      return {
+        message: 'Empleado actualizado correctamente',
+        data: empleadoData,
+      };
     } catch (error) {
-        throw boom.badRequest(error.message);
+      throw boom.badRequest(error.message);
     }
   }
 
