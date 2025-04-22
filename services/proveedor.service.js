@@ -52,7 +52,10 @@ class ProveedorService {
       if (!proveedor.estado) {
         throw boom.conflict('Proveedor desactivado');
       }
-      return proveedor;
+      return {
+        message: 'Proveedor encontrado correctamente',
+        data: proveedor,
+      };
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;

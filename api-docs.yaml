@@ -328,3 +328,409 @@ paths:
                     type: string
                     example: "Proveedor desactivado correctamente"
 
+  /GET/areas:
+    get:
+      summary: Obtener todas las áreas
+      description: Obtiene una lista de todas las áreas activas en el sistema
+      responses:
+        '200':
+          description: Lista de áreas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Areas activas encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                          minLength: 5
+                          maxLength: 45
+                        descripcion:
+                          type: string
+                          minLength: 5
+                          maxLength: 200
+                        estado:
+                          type: boolean
+        '404':
+          description: No se encontraron áreas activas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "No hay areas activas"
+
+  /GET/areas/{id}:
+    get:
+      summary: Obtener área por ID
+      description: Obtiene un área específica por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Área encontrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Area encontrada correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      nombre:
+                        type: string
+                      descripcion:
+                        type: string
+                      estado:
+                        type: boolean
+        '404':
+          description: Área no encontrada
+
+  /POST/areas:
+    post:
+      summary: Crear área
+      description: Crea una nueva área en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - descripcion
+              properties:
+                nombre:
+                  type: string
+                  minLength: 5
+                  maxLength: 45
+                descripcion:
+                  type: string
+                  minLength: 5
+                  maxLength: 200
+      responses:
+        '201':
+          description: Área creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Area creada correctamente"
+                  data:
+                    type: object
+
+  /PUT/areas/{id}:
+    put:
+      summary: Actualizar área
+      description: Actualiza un área existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  minLength: 5
+                  maxLength: 45
+                descripcion:
+                  type: string
+                  minLength: 5
+                  maxLength: 200
+      responses:
+        '200':
+          description: Área actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Area actualizada correctamente"
+                  data:
+                    type: object
+
+  /PATCH/areas/{id}:
+    patch:
+      summary: Eliminar área
+      description: Marca un área como eliminada (inactiva)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Área eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Area eliminada correctamente"
+
+  /GET/jornadas:
+    get:
+      summary: Obtener todas las jornadas
+      description: Obtiene una lista de todas las jornadas activas en el sistema
+      responses:
+        '200':
+          description: Lista de jornadas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Jornadas activas encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: No se encontraron jornadas activas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "No hay jornadas activas"
+
+  /GET/jornadas/{id}:
+    get:
+      summary: Obtener jornada por ID
+      description: Obtiene una jornada específica por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Jornada encontrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Jornada encontrada correctamente"
+                  data:
+                    type: object
+        '404':
+          description: Jornada no encontrada
+
+  /GET/roles:
+    get:
+      summary: Obtener todos los roles
+      description: Obtiene una lista de todos los roles activos en el sistema
+      responses:
+        '200':
+          description: Lista de roles obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Roles activos encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                        descripcion:
+                          type: string
+                        salario:
+                          type: integer
+                        id_rol_superior:
+                          type: integer
+                        estado:
+                          type: boolean
+        '404':
+          description: No se encontraron roles activos
+
+  /GET/roles/{id}:
+    get:
+      summary: Obtener rol por ID
+      description: Obtiene un rol específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rol encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rol encontrado correctamente"
+                  data:
+                    type: object
+        '404':
+          description: Rol no encontrado
+
+  /POST/roles:
+    post:
+      summary: Crear rol
+      description: Crea un nuevo rol en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - descripcion
+                - salario
+              properties:
+                nombre:
+                  type: string
+                  minLength: 5
+                  maxLength: 45
+                descripcion:
+                  type: string
+                  minLength: 5
+                  maxLength: 200
+                salario:
+                  type: integer
+                  minimum: 0
+                  maximum: 1000000
+                id_rol_superior:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000000
+      responses:
+        '201':
+          description: Rol creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rol creado correctamente"
+                  data:
+                    type: object
+
+  /PUT/roles/{id}:
+    put:
+      summary: Actualizar rol
+      description: Actualiza un rol existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  minLength: 5
+                  maxLength: 45
+                descripcion:
+                  type: string
+                  minLength: 5
+                  maxLength: 200
+                salario:
+                  type: integer
+                  minimum: 0
+                  maximum: 1000000
+                id_rol_superior:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000000
+      responses:
+        '200':
+          description: Rol actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rol actualizado correctamente"
+                  data:
+                    type: object
+
+  /PATCH/roles/{id}:
+    patch:
+      summary: Eliminar rol
+      description: Marca un rol como eliminado (inactivo)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rol eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rol eliminado correctamente"
+
