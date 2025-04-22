@@ -62,6 +62,10 @@ const EmpleadoSchema = {
     allowNull: false,
     type: DataTypes.STRING(255),
   },
+  email: {
+    allowNull: false,
+    type: DataTypes.STRING(100),
+  },
   createdAt: {
     allowNull: true,
     type: DataTypes.DATE,
