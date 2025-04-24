@@ -6,6 +6,9 @@ const orderRouter = require('./routers/orden.router');
 const jornadaRouter = require('./routers/jornadas.router');
 const rolesrouter = require('./routers/roles.router');
 const areasRouter = require('./routers/areas.router');
+const reembolsosRouter = require('./routers/reembolsos.router');
+
+const movimientosRouter = require('./routers/movimientos.router');
 
 function routerApi(app) {
   const router = express.Router();
@@ -17,6 +20,8 @@ function routerApi(app) {
   router.use(jornadaRouter);
   router.use(rolesrouter);
   router.use(areasRouter);
+  router.use('/reembolsos', reembolsosRouter);
+  router.use('/movimientos', movimientosRouter);
 }
 
 module.exports = routerApi;
