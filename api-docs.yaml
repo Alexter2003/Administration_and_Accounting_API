@@ -734,3 +734,413 @@ paths:
                     type: string
                     example: "Rol eliminado correctamente"
 
+  /GET/empleados:
+    get:
+      summary: Obtener todos los empleados
+      description: Obtiene una lista de todos los empleados activos en el sistema
+      responses:
+        '200':
+          description: Lista de empleados obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleados activos encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        dpi:
+                          type: string
+                          pattern: "^[0-9]{13}$"
+                        nombres:
+                          type: string
+                          minLength: 3
+                          maxLength: 100
+                        apellidos:
+                          type: string
+                          minLength: 3
+                          maxLength: 100
+                        telefono:
+                          type: string
+                          pattern: "^[0-9]{8}$"
+                        direccion:
+                          type: string
+                          minLength: 3
+                          maxLength: 255
+                        nit:
+                          type: string
+                        genero:
+                          type: boolean
+                        id_jornada:
+                          type: integer
+                        email:
+                          type: string
+                          format: email
+                          minLength: 3
+                          maxLength: 100
+        '404':
+          description: No se encontraron empleados activos
+
+  /GET/empleados/{id}:
+    get:
+      summary: Obtener empleado por ID
+      description: Obtiene un empleado específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Empleado encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleado encontrado correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      dpi:
+                        type: string
+                      nombres:
+                        type: string
+                      apellidos:
+                        type: string
+                      telefono:
+                        type: string
+                      direccion:
+                        type: string
+                      nit:
+                        type: string
+                      genero:
+                        type: boolean
+                      id_jornada:
+                        type: integer
+                      email:
+                        type: string
+        '404':
+          description: Empleado no encontrado
+
+  /POST/empleados:
+    post:
+      summary: Crear empleado
+      description: Crea un nuevo empleado en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - dpi
+                - nombres
+                - apellidos
+                - telefono
+                - direccion
+                - nit
+                - genero
+                - id_jornada
+                - email
+              properties:
+                dpi:
+                  type: string
+                  pattern: "^[0-9]{13}$"
+                nombres:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                apellidos:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                telefono:
+                  type: string
+                  pattern: "^[0-9]{8}$"
+                direccion:
+                  type: string
+                  minLength: 3
+                  maxLength: 255
+                nit:
+                  type: string
+                genero:
+                  type: boolean
+                id_jornada:
+                  type: integer
+                email:
+                  type: string
+                  format: email
+                  minLength: 3
+                  maxLength: 100
+      responses:
+        '201':
+          description: Empleado creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleado creado correctamente"
+                  data:
+                    type: object
+
+  /PUT/empleados/{id}:
+    put:
+      summary: Actualizar empleado
+      description: Actualiza un empleado existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dpi:
+                  type: string
+                  pattern: "^[0-9]{13}$"
+                nombres:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                apellidos:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                telefono:
+                  type: string
+                  pattern: "^[0-9]{8}$"
+                direccion:
+                  type: string
+                  minLength: 3
+                  maxLength: 255
+                nit:
+                  type: string
+                genero:
+                  type: boolean
+                id_jornada:
+                  type: integer
+                email:
+                  type: string
+                  format: email
+                  minLength: 3
+                  maxLength: 100
+      responses:
+        '200':
+          description: Empleado actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleado actualizado correctamente"
+                  data:
+                    type: object
+
+  /PATCH/empleados/{id}:
+    patch:
+      summary: Eliminar empleado
+      description: Marca un empleado como eliminado (inactivo)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Empleado eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleado eliminado correctamente"
+
+  /GET/ordenes:
+    get:
+      summary: Obtener todas las órdenes
+      description: Obtiene una lista de todas las órdenes activas en el sistema
+      responses:
+        '200':
+          description: Lista de órdenes obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Órdenes activas encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        id_servicio:
+                          type: integer
+                        id_estado_orden:
+                          type: integer
+                          minimum: 1
+                          maximum: 4
+                        id_proveedor:
+                          type: integer
+                        fecha_orden:
+                          type: string
+                          format: date
+        '404':
+          description: No se encontraron órdenes activas
+
+  /GET/ordenes/{id}:
+    get:
+      summary: Obtener orden por ID
+      description: Obtiene una orden específica por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orden encontrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Orden encontrada correctamente"
+                  data:
+                    type: object
+        '404':
+          description: Orden no encontrada
+
+  /PUT/ordenes/modificar_estado/{id}:
+    put:
+      summary: Actualizar estado de orden
+      description: Actualiza el estado de una orden existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - estado
+              properties:
+                estado:
+                  type: integer
+                  minimum: 1
+                  maximum: 4
+      responses:
+        '200':
+          description: Estado de orden actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estado de orden actualizado correctamente"
+                  data:
+                    type: object
+
+  /PUT/ordenes/detalle/{id}:
+    put:
+      summary: Actualizar estado de detalle de orden
+      description: Actualiza el estado de un detalle específico de una orden
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - estado
+              properties:
+                estado:
+                  type: integer
+                  enum: [1, 2, 3]
+                cantidad:
+                  type: integer
+                  minimum: 1
+                  description: "Requerido solo cuando estado es 2"
+      responses:
+        '200':
+          description: Estado de detalle actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estado de detalle actualizado correctamente"
+                  data:
+                    type: object
+
+  /POST/ordenes/reabastecer/{id}:
+    post:
+      summary: Reabastecer orden
+      description: Realiza el reabastecimiento de una orden específica
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orden reabastecida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Orden reabastecida correctamente"
+                  data:
+                    type: object
+
