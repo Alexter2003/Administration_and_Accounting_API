@@ -4,8 +4,8 @@ const { ESTADO_ORDEN_TABLE } = require('../../src/models/estado_orden.model');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface) {
-    await queryInterface.bulkInsert(ESTADO_ORDEN_TABLE, [
+  async up (queryInterface, Sequelize) {
+    const estados = [
       {
         nombre: 'Confirmada',
         descripcion: 'Orden creada y aceptada',
@@ -22,7 +22,21 @@ module.exports = {
         nombre: 'Cancelada',
         descripcion: 'Orden cancelada por el cliente',
       },
-    ]);
+    ];
+
+    // Check for existing records
+    const existingRecords = await queryInterface.sequelize.query(
+      `SELECT nombre FROM "${ESTADO_ORDEN_TABLE}";`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    const existingNames = existingRecords.map(record => record.nombre);
+
+    // Filter out existing records
+    const newRecords = estados.filter(estado => !existingNames.includes(estado.nombre));
+
+    if (newRecords.length > 0) {
+      await queryInterface.bulkInsert(ESTADO_ORDEN_TABLE, newRecords);
+    }
   },
 
   async down(queryInterface) {

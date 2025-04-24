@@ -3,6 +3,11 @@ const alertaRouter = require('./routers/alerta.router');
 const proveedorRouter = require('./routers/proveedores.router');
 const empleadoRouter = require('./routers/empleados.router');
 const autenticacionRouter = require('./routers/autenticacion.router');
+const orderRouter = require('./routers/orden.router');
+const jornadaRouter = require('./routers/jornadas.router');
+const rolesrouter = require('./routers/roles.router');
+const areasRouter = require('./routers/areas.router');
+
 function routerApi(app) {
   const router = express.Router();
   app.use('/api/administracion', router);
@@ -10,6 +15,10 @@ function routerApi(app) {
   router.use(proveedorRouter);
   router.use(empleadoRouter);
   router.use(autenticacionRouter);
+  router.use(orderRouter);
+  router.use(jornadaRouter);
+  router.use(rolesrouter);
+  router.use(areasRouter);
 }
 
 module.exports = routerApi;
