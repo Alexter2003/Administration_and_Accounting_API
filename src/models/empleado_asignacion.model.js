@@ -72,7 +72,7 @@ class EmpleadoAsignacion extends Model {
       sequelize,
       tableName: EMPLEADO_ASIGNACION_TABLE,
       modelName: 'EmpleadoAsignacion',
-      timestamps: true,
+      timestamps: false,
     };
   }
 }

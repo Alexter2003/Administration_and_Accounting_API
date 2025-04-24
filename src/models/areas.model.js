@@ -18,6 +18,16 @@ const AreasSchema = {
     allowNull: false,
     type: DataTypes.STRING(255),
   },
+  id_servicio: {
+    allowNull: false,
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'servicios',
+      key: 'id',
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'RESTRICT',
+  },
   estado: {
     allowNull: false,
     type: DataTypes.BOOLEAN,
@@ -27,6 +37,11 @@ const AreasSchema = {
 
 class Areas extends Model {
   static associate(models) {
+    this.belongsTo(models.Servicio, {
+      as: 'servicio',
+      foreignKey: 'id_servicio',
+    });
+
     this.hasMany(models.EmpleadoAsignacion, {
       as: 'empleados_asignaciones',
       foreignKey: 'id_area',
