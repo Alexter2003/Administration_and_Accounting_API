@@ -2,10 +2,11 @@ const MovimientosService = require('../../services/movimientos.service');
 const service = new MovimientosService();
 
 class MovimientosController {
-  async find(req, res, next) {
+  async findWithFilters(req, res, next) {
     try {
-      const movimientos = await service.find();
-      res.status(200).json(movimientos);
+      const { desde, hasta, id_servicio } = req.query;
+      const resultado = await service.findWithFilters({ desde, hasta, id_servicio });
+      res.status(200).json(resultado);
     } catch (error) {
       next(error);
     }
@@ -14,30 +15,7 @@ class MovimientosController {
   async findOne(req, res, next) {
     try {
       const { id } = req.params;
-      const movimiento = await service.findOne(id);
-      res.status(200).json(movimiento);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async create(req, res, next) {
-    try {
-      const data = req.body;
-      const nuevoMovimiento = await service.create(data);
-      res.status(201).json({
-        mensaje: 'Movimiento creado exitosamente',
-        data: nuevoMovimiento,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async findWithFilters(req, res, next) {
-    try {
-      const filtros = req.query;
-      const resultado = await service.findWithFilters(filtros);
+      const resultado = await service.findOne(id);
       res.status(200).json(resultado);
     } catch (error) {
       next(error);
@@ -46,55 +24,84 @@ class MovimientosController {
 
   async findDiarios(req, res, next) {
     try {
-      const filtros = req.query;
-      const resultado = await service.findDiarios(filtros);
+      const { fecha, id_servicio } = req.query;
+      const resultado = await service.findDiarios({ fecha, id_servicio });
+      res.status(200).json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findMensuales(req, res, next) {
+    try {
+      const { mes, año, id_servicio } = req.query;
+      const resultado = await service.findMensuales({ mes, año, id_servicio });
+      res.status(200).json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findTrimestrales(req, res, next) {
+    try {
+      const { trimestre, año, id_servicio } = req.query;
+      const resultado = await service.findTrimestrales({ trimestre, año, id_servicio });
+      res.status(200).json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findSemestrales(req, res, next) {
+    try {
+      const { semestre, año, id_servicio } = req.query;
+      const resultado = await service.findSemestrales({ semestre, año, id_servicio });
+      res.status(200).json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findAnuales(req, res, next) {
+    try {
+      const { año, id_servicio } = req.query;
+      const resultado = await service.findAnuales({ año, id_servicio });
+      res.status(200).json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async pagarSalarios(req, res, next) {
+    try {
+      const response = await service.obtenerSalarios();
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+  
+  async obtenerOrdenes(req, res, next) {
+    try {
+      const { desde, hasta, id_servicio } = req.query;
+      const resultado = await service.obtenerOrdenes({ desde, hasta, id_servicio });
       res.status(200).json(resultado);
     } catch (error) {
       next(error);
     }
   }
   
-
-  async findMensuales(req, res, next) {
+  async obtenerVentas(req, res, next) {
     try {
-      const filtros = req.query;
-      const resultado = await service.findMensuales(filtros);
-      res.status(200).json(resultado);
+      const { desde, hasta, id_servicio } = req.query;
+      const response = await service.obtenerVentas({ desde, hasta, id_servicio });
+      res.status(201).json(response);
     } catch (error) {
       next(error);
     }
   }
-
-async findTrimestrales(req, res, next) {
-  try {
-    const filtros = req.query;
-    const resultado = await service.findTrimestrales(filtros);
-    res.status(200).json(resultado);
-  } catch (error) {
-    next(error);
-  }
-}
-
-async findSemestrales(req, res, next) {
-  try {
-    const filtros = req.query;
-    const resultado = await service.findSemestrales(filtros);
-    res.status(200).json(resultado);
-  } catch (error) {
-    next(error);
-  }
-}
-
-async findAnuales(req, res, next) {
-  try {
-    const filtros = req.query;
-    const resultado = await service.findAnuales(filtros);
-    res.status(200).json(resultado);
-  } catch (error) {
-    next(error);
-  }
-}
-
+  
+  
 }
 
 module.exports = MovimientosController;

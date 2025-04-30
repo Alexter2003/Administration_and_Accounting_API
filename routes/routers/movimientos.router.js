@@ -1,73 +1,85 @@
 const express = require('express');
 const MovimientosController = require('../../src/controllers/movimientos.controller');
-const validatorHandler = require('../../middlewares/validator.handler');
-
-
+const validatorHandler      = require('../../middlewares/validator.handler');
 const {
   getMovimientoSchema,
-  createMovimientoSchema,
-  getMovimientosQuerySchema,
+  getDiariosSchema,
   getMensualesSchema,
   getTrimestralesSchema,
   getSemestralesSchema,
   getAnualesSchema,
-  getDiariosSchema 
+  getMovimientosQuerySchema,
+  getOrdenesSchema,
+  getVentasSchema 
+
 } = require('../../Schemas/movimientos.schema');
 
 
 const router = express.Router();
-const movimientosController = new MovimientosController();
+const ctrl   = new MovimientosController();
 
-// Obtener movimientos con filtros
+
 router.get(
-  '/',
-  validatorHandler(getMovimientosQuerySchema, 'query'),
-  (req, res, next) => movimientosController.findWithFilters(req, res, next)
+  '/GET/movimientos/diarios',
+  validatorHandler(getDiariosSchema, 'query'),
+  (req, res, next) => ctrl.findDiarios(req, res, next)
 );
 
-// Obtener un movimiento específico por ID
+router.get(
+  '/GET/movimientos/mensuales',
+  validatorHandler(getMensualesSchema, 'query'),
+  (req, res, next) => ctrl.findMensuales(req, res, next)
+);
+
+router.get(
+  '/GET/movimientos/trimestrales',
+  validatorHandler(getTrimestralesSchema, 'query'),
+  (req, res, next) => ctrl.findTrimestrales(req, res, next)
+);
+
+router.get(
+  '/GET/movimientos/semestrales',
+  validatorHandler(getSemestralesSchema, 'query'),
+  (req, res, next) => ctrl.findSemestrales(req, res, next)
+);
+
+router.get(
+  '/GET/movimientos/anuales',
+  validatorHandler(getAnualesSchema, 'query'),
+  (req, res, next) => ctrl.findAnuales(req, res, next)
+);
+
+router.post(
+  '/POST/pagar-salarios',
+  (req, res, next) => ctrl.pagarSalarios(req, res, next)
+);
+
+
+router.get(
+  '/GET/movimientos',
+  validatorHandler(getMovimientosQuerySchema, 'query'),
+  (req, res, next) => ctrl.findWithFilters(req, res, next)
+);
+
+router.get(
+  '/GET/movimientos/ordenes',
+  (req, res, next) => ctrl.obtenerOrdenes(req, res, next)
+);
+
+router.get(
+  '/GET/movimientos/ventas',
+  validatorHandler(getVentasSchema, 'query'),
+  (req, res, next) => ctrl.obtenerVentas(req, res, next)
+);
+
+
+
 router.get(
   '/GET/movimientos/:id',
   validatorHandler(getMovimientoSchema, 'params'),
-  (req, res, next) => movimientosController.findOne(req, res, next)
-);
-
-router.get(
-  '/diarios',
-  validatorHandler(getDiariosSchema, 'query'),
-  (req, res, next) => movimientosController.findDiarios(req, res, next)
+  (req, res, next) => ctrl.findOne(req, res, next)
 );
 
 
-router.get(
-  '/mensuales',
-  validatorHandler(getMensualesSchema, 'query'),
-  (req, res, next) => movimientosController.findMensuales(req, res, next)
-);
-
-router.get(
-  '/trimestrales',
-  validatorHandler(getTrimestralesSchema, 'query'),
-  (req, res, next) => movimientosController.findTrimestrales(req, res, next)
-);
-
-router.get(
-  '/semestrales',
-  validatorHandler(getSemestralesSchema, 'query'),
-  (req, res, next) => movimientosController.findSemestrales(req, res, next)
-);
-
-router.get(
-  '/anuales',
-  validatorHandler(getAnualesSchema, 'query'),
-  (req, res, next) => movimientosController.findAnuales(req, res, next)
-);
-
-// Crear un nuevo movimiento (si se usa además de reembolsos)
-router.post(
-  '/POST/movimientos',
-  validatorHandler(createMovimientoSchema, 'body'),
-  (req, res, next) => movimientosController.create(req, res, next)
-);
 
 module.exports = router;
