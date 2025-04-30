@@ -66,11 +66,14 @@ class ProveedorService {
 
   async update(id, changes) {
     try {
-      const proveedor = await this.findOne(id);
-      const updatedProveedor = await proveedor.update(changes);
+
+      const updatedProveedor = await models.Proveedor.update(changes, {
+        where: { id },
+        returning: true
+      });
       return {
         message: 'Proveedor actualizado correctamente',
-        data: updatedProveedor,
+        data: updatedProveedor[1][0],
       };
     } catch (error) {
       if (boom.isBoom(error)) {
