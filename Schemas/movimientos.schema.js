@@ -55,7 +55,7 @@ const getOrdenesSchema = joi.object({
   hasta: fecha.required()
 });
 
-const getVentasSchema = Joi.object({
+const getVentasSchema = joi.object({
   desde: fecha.required(),
   hasta: fecha.required(),
   id_servicio: id_servicio.required()
