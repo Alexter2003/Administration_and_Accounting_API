@@ -1144,3 +1144,318 @@ paths:
                   data:
                     type: object
 
+  /GET/servicios:
+    get:
+      summary: Obtener todos los servicios
+      description: Obtiene una lista de todos los servicios activos en el sistema
+      responses:
+        '200':
+          description: Lista de servicios obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Servicios encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                          maxLength: 45
+                        descripcion:
+                          type: string
+                          maxLength: 150
+                        estado:
+                          type: boolean
+                          default: true
+        '404':
+          description: No se encontraron servicios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No hay servicios disponibles"
+
+  /GET/servicios/{id}:
+    get:
+      summary: Obtener servicio por ID
+      description: Obtiene un servicio específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Servicio encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Servicio encontrado correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      nombre:
+                        type: string
+                        maxLength: 45
+                      descripcion:
+                        type: string
+                        maxLength: 150
+                      estado:
+                        type: boolean
+        '404':
+          description: Servicio no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Servicio no encontrado"
+
+  /GET/estados_ordenes_detalles:
+    get:
+      summary: Obtener todos los estados de detalle
+      description: Obtiene una lista de todos los estados posibles para los detalles de órdenes
+      responses:
+        '200':
+          description: Lista de estados de detalle obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estados encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                          maxLength: 45
+                        descripcion:
+                          type: string
+                          maxLength: 255
+        '404':
+          description: No se encontraron estados de detalle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No hay estados disponibles"
+
+  /GET/estados_ordenes:
+    get:
+      summary: Obtener todos los estados de orden
+      description: Obtiene una lista de todos los estados posibles para las órdenes
+      responses:
+        '200':
+          description: Lista de estados de orden obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estados encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                          maxLength: 45
+                        descripcion:
+                          type: string
+                          maxLength: 255
+        '404':
+          description: No se encontraron estados de orden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No hay estados disponibles"
+
+  /post/login:
+    post:
+      summary: Iniciar sesión
+      description: Autentica un usuario en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 6
+      responses:
+        '200':
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Inicio de sesión exitoso"
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                      user:
+                        type: object
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: "Credenciales inválidas"
+
+  /post/cambiar-password:
+    post:
+      summary: Cambiar contraseña
+      description: Permite a un usuario cambiar su contraseña actual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - oldPassword
+                - newPassword
+              properties:
+                oldPassword:
+                  type: string
+                  minLength: 6
+                newPassword:
+                  type: string
+                  minLength: 6
+      responses:
+        '200':
+          description: Contraseña cambiada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Contraseña actualizada correctamente"
+        '401':
+          description: Contraseña actual incorrecta
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: "Contraseña actual incorrecta"
+
+  /post/restablecer-password:
+    post:
+      summary: Restablecer contraseña
+      description: Permite restablecer la contraseña de un usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Solicitud de restablecimiento enviada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Se ha enviado un correo con las instrucciones"
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No se encontró un usuario con ese correo"
+
