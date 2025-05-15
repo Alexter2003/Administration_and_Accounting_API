@@ -9,7 +9,6 @@ class ProveedorService {
       const newProveedor = await models.Proveedor.create(data);
       return {
         message: 'Proveedor creado correctamente',
-        data: newProveedor,
       };
     } catch (error) {
       throw boom.badRequest(error);
@@ -29,7 +28,7 @@ class ProveedorService {
       }
       return {
         message: 'Proveedores activos encontrados correctamente',
-        data: proveedores,
+        proveedores: proveedores,
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -52,7 +51,10 @@ class ProveedorService {
       if (!proveedor.estado) {
         throw boom.conflict('Proveedor desactivado');
       }
-      return proveedor;
+      return {
+        message: 'Proveedor activo encontrado correctamente',
+        proveedor: proveedor,
+      };
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;
@@ -67,7 +69,6 @@ class ProveedorService {
       const updatedProveedor = await proveedor.update(changes);
       return {
         message: 'Proveedor actualizado correctamente',
-        data: updatedProveedor,
       };
     } catch (error) {
       if (boom.isBoom(error)) {

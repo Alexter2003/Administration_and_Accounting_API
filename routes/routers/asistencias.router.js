@@ -34,4 +34,12 @@ router.get(
   (req, res, next) => asistenciasController.findByEmpleado(req, res, next)
 );
 
+// Obtener inasistencias por empleado en un rango de fechas
+router.get(
+  '/GET/inasistencias/empleado/:id',
+  validatorHandler(getAsistenciasByEmpleadoSchema, 'params'),
+  validatorHandler(getAsistenciasQuerySchema, 'query'),
+  (req, res, next) => asistenciasController.findInasistenciasByEmpleado(req, res, next)
+);
+
 module.exports = router;

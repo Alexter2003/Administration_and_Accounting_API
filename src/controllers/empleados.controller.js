@@ -38,6 +38,15 @@ class EmpleadosController {
     }
   }
 
+  async findEmpleadosAnteriores(req, res, next) {
+    try {
+      const empleado = await service.findEmpleadosAnteriores();
+      res.status(200).json(empleado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async delete(req, res, next) {
     try {
       const empleado = await service.delete(req.params.id);

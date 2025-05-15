@@ -1,23 +1,21 @@
 const boom = require('@hapi/boom');
 const moment = require('moment');
-const { models, Sequelize } = require('./../config/sequelize');
+const { models, sequelize, Sequelize } = require('./../config/sequelize');
+const { inasistencias_por_empleado } = require('../db/queries/queries');
 const { Op } = Sequelize;
 
 class AsistenciasService {
   async create(data) {
     const { id_empleado, fecha, hora_entrada } = data;
 
-    //Normaliza la fecha a solo YYYY-MM-DD
-    const fechaSolo = moment(fecha).format('YYYY-MM-DD');
-
-    //Busca si ya existe una asistencia para ese empleado en esa fecha (ignorando la hora)
+    //Busca si ya existe una asistencia para ese empleado en esa fecha
     const asistenciaExistente = await models.Asistencia.findOne({
       where: {
         id_empleado,
         [Op.and]: [
           Sequelize.where(
             Sequelize.cast(Sequelize.col('fecha'), 'DATE'),
-            fechaSolo
+            fecha
           ),
         ],
       },
@@ -73,10 +71,22 @@ class AsistenciasService {
     });
 
     return asistencias.map(asistencia => ({
-      fecha: asistencia.fecha,
+      fecha: moment(asistencia.fecha).format('YYYY-MM-DD'),
       hora_entrada: asistencia.hora_entrada,
       hora_salida: asistencia.hora_salida,
     }));
+  }
+
+  async findInasistenciasPorEmpleado(id_empleado, fecha_inicio, fecha_fin) {
+    const [result] = await sequelize.query(inasistencias_por_empleado, {
+      replacements: { id_empleado, fecha_inicio, fecha_fin },
+      type: Sequelize.QueryTypes.SELECT,
+    });
+
+    return {
+      no_inasistencias: Number(result.no_inasistencias) || 0,
+      inasistencias: result.inasistencias ? result.inasistencias.filter(Boolean) : [],
+    };
   }
 
 }

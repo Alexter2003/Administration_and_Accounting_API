@@ -119,15 +119,18 @@ class EmpleadosService {
         const asignacion = empleadoData.empleado_asignacion || [];
         delete empleadoData.empleado_asignacion;
 
-        return {
-          empleado: empleadoData,
-          asignacion: asignacion.map(asignacion => ({
-            id_area: asignacion.id_area,
-            area: asignacion.area?.nombre || null,
-            id_rol: asignacion.id_rol,
-            horas_semanales: asignacion.horas_semanales,
-          })),
-        };
+      return {
+        empleado: empleadoData,
+        asignacion: asignacion.length > 0
+          ? {
+            id_area: asignacion[0].id_area,
+            area: asignacion[0].area?.nombre,
+            id_rol: asignacion[0].id_rol,
+            rol: asignacion[0].rol?.nombre,
+            horas_semanales: asignacion[0].horas_semanales,
+            }
+          : null,
+      };
       });
 
       return {
@@ -169,14 +172,16 @@ class EmpleadosService {
       delete empleadoData.empleado_asignacion;
 
       return {
-        message: 'Empleado encontrado correctamente',
         empleado: empleadoData,
-        asignacion: asignacion.map(asignacion => ({
-          id_area: asignacion.id_area,
-          area: asignacion.area?.nombre || null,
-          id_rol: asignacion.id_rol,
-          horas_semanales: asignacion.horas_semanales,
-        })),
+        asignacion: asignacion.length > 0
+          ? {
+            id_area: asignacion[0].id_area,
+            area: asignacion[0].area?.nombre,
+            id_rol: asignacion[0].id_rol,
+            rol: asignacion[0].rol?.nombre,
+            horas_semanales: asignacion[0].horas_semanales,
+            }
+          : null,
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -250,6 +255,51 @@ class EmpleadosService {
 
     return {
       message: 'Empleado actualizado correctamente'
+    };
+  }
+
+  async findEmpleadosAnteriores() {
+    const empleados = await models.Empleado.findAll({
+      attributes: {
+        exclude: ['createdAt', 'updatedAt', 'password'],
+      },
+      where: { estado: false },
+      include: [
+        {
+          model: models.EmpleadoAsignacion,
+          as: 'empleado_asignacion',
+          include: [
+            { model: models.Rol, as: 'rol' },
+            { model: models.Areas, as: 'area' },
+          ],
+        },
+      ],
+      order: [['id', 'ASC']],
+    });
+
+    // Formatear igual que en find()
+    const empleadosFormateados = empleados.map((empleado) => {
+      const empleadoData = empleado.toJSON();
+      const asignacion = empleadoData.empleado_asignacion || [];
+      delete empleadoData.empleado_asignacion;
+
+      return {
+        empleado: empleadoData,
+        asignacion: asignacion.length > 0
+          ? {
+            id_area: asignacion[0].id_area,
+            area: asignacion[0].area?.nombre,
+            id_rol: asignacion[0].id_rol,
+            rol: asignacion[0].rol?.nombre,
+            horas_semanales: asignacion[0].horas_semanales,
+            }
+          : null,
+      };
+    });
+
+    return {
+      message: 'Empleados inactivos encontrados correctamente',
+      empleados: empleadosFormateados,
     };
   }
 

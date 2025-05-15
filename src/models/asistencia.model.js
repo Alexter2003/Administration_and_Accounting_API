@@ -21,7 +21,7 @@ const AsistenciaSchema = {
   },
   fecha: {
     allowNull: false,
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
   },
   hora_entrada: {
     allowNull: false,

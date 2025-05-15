@@ -45,6 +45,17 @@ class AsistenciasController {
     }
   }
 
+  async findInasistenciasByEmpleado(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { fecha_inicio, fecha_fin } = req.query;
+    const data = await service.findInasistenciasPorEmpleado(id, fecha_inicio, fecha_fin);
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+}
+
 }
 
 module.exports = AsistenciasController;
