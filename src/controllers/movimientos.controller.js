@@ -2,15 +2,15 @@ const MovimientosService = require('../../services/movimientos.service');
 const service = new MovimientosService();
 
 class MovimientosController {
-  async findWithFilters(req, res, next) {
-    try {
-      const { desde, hasta, id_servicio } = req.query;
-      const resultado = await service.findWithFilters({ desde, hasta, id_servicio });
-      res.status(200).json(resultado);
-    } catch (error) {
-      next(error);
-    }
+async findAll(req, res, next) {
+  try {
+    const resultado = await service.findAll();
+    res.status(200).json(resultado);
+  } catch (error) {
+    next(error);
   }
+}
+
 
   async findOne(req, res, next) {
     try {
@@ -80,27 +80,7 @@ class MovimientosController {
       next(error);
     }
   }
-  
-  async obtenerOrdenes(req, res, next) {
-    try {
-      const { desde, hasta, id_servicio } = req.query;
-      const resultado = await service.obtenerOrdenes({ desde, hasta, id_servicio });
-      res.status(200).json(resultado);
-    } catch (error) {
-      next(error);
-    }
-  }
-  
-  async obtenerVentas(req, res, next) {
-    try {
-      const { desde, hasta, id_servicio } = req.query;
-      const response = await service.obtenerVentas({ desde, hasta, id_servicio });
-      res.status(201).json(response);
-    } catch (error) {
-      next(error);
-    }
-  }
-  
+
   
 }
 

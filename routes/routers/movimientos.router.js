@@ -57,20 +57,10 @@ router.post(
 
 router.get(
   '/GET/movimientos',
-  validatorHandler(getMovimientosQuerySchema, 'query'),
-  (req, res, next) => ctrl.findWithFilters(req, res, next)
+  (req, res, next) => ctrl.findAll(req, res, next)
 );
 
-router.get(
-  '/GET/movimientos/ordenes',
-  (req, res, next) => ctrl.obtenerOrdenes(req, res, next)
-);
 
-router.get(
-  '/GET/movimientos/ventas',
-  validatorHandler(getVentasSchema, 'query'),
-  (req, res, next) => ctrl.obtenerVentas(req, res, next)
-);
 
 
 

@@ -1,67 +1,72 @@
-const joi = require('joi');
+const Joi = require('joi');
 
-const id          = joi.number().integer();
-const concepto    = joi.string().min(5).max(150);
-const cantidad    = joi.number().positive();
-const fecha       = joi.date().iso();
-const id_producto = joi.number().integer().allow(null);
-const nombre_producto  = joi.string().max(45).allow(null);
-const nombre_empleado  = joi.string().max(45).allow(null);
-const id_servicio = joi.number().integer().required();
+// Campos base
+const id = Joi.number().integer();
+const concepto = Joi.string().min(5).max(150);
+const cantidad = Joi.number().positive();
+const fecha = Joi.date().iso();
+const id_producto = Joi.number().integer().allow(null);
+const nombre_producto = Joi.string().max(45).allow(null);
+const nombre_empleado = Joi.string().max(45).allow(null);
+
+const id_servicio = Joi.alternatives().try(
+  Joi.number().integer(),
+  Joi.string().pattern(/^\d+$/).custom((value) => parseInt(value)) 
+).optional();
 
 
-const getMovimientoSchema = joi.object({
+
+const getMovimientoSchema = Joi.object({
   id: id.required()
 });
 
-const getDiariosSchema = joi.object({
+const getDiariosSchema = Joi.object({
   fecha: fecha.required(),
   id_servicio
 });
 
-const getMovimientosQuerySchema = joi.object({
+const getMensualesSchema = Joi.object({
+  mes: Joi.number().integer().min(1).max(12).required(),
+  año: Joi.number().integer().min(2000).max(2100).required(),
+  id_servicio
+});
+
+const getTrimestralesSchema = Joi.object({
+  trimestre: Joi.number().integer().min(1).max(4).required(),
+  año: Joi.number().integer().min(2000).max(2100).required(),
+  id_servicio
+});
+
+const getSemestralesSchema = Joi.object({
+  semestre: Joi.number().integer().min(1).max(2).required(),
+  año: Joi.number().integer().min(2000).max(2100).required(),
+  id_servicio
+});
+
+const getAnualesSchema = Joi.object({
+  año: Joi.number().integer().min(2000).max(2100).required(),
+  id_servicio
+});
+
+const getMovimientosQuerySchema = Joi.object({
   desde: fecha,
   hasta: fecha,
-  id_servicio: joi.number().integer() 
-});
-
-
-const getMensualesSchema = joi.object({
-  mes: joi.number().integer().min(1).max(12).required(),
-  año: joi.number().integer().min(2000).max(2100).required(),
   id_servicio
 });
 
-const getTrimestralesSchema = joi.object({
-  trimestre: joi.number().integer().min(1).max(4).required(),
-  año: joi.number().integer().min(2000).max(2100).required(),
-  id_servicio
-});
-
-const getSemestralesSchema = joi.object({
-  semestre: joi.number().integer().min(1).max(2).required(),
-  año: joi.number().integer().min(2000).max(2100).required(),
-  id_servicio
-});
-
-const getAnualesSchema = joi.object({
-  año: joi.number().integer().min(2000).max(2100).required(),
-  id_servicio
-});
-
-const getOrdenesSchema = joi.object({
-  id_servicio: joi.number().integer().required(),
+const getOrdenesSchema = Joi.object({
   desde: fecha.required(),
-  hasta: fecha.required()
+  hasta: fecha.required(),
+  id_servicio: id_servicio.required() // este sigue siendo requerido
 });
 
-const getVentasSchema = joi.object({
+const getVentasSchema = Joi.object({
   desde: fecha.required(),
   hasta: fecha.required(),
   id_servicio: id_servicio.required()
 });
 
-const createMovimientoSchema = joi.object({
+const createMovimientoSchema = Joi.object({
   concepto: concepto.required(),
   cantidad: cantidad.required(),
   fecha_movimiento: fecha.required(),
@@ -70,21 +75,25 @@ const createMovimientoSchema = joi.object({
   id_producto,
   nombre_producto,
   nombre_empleado,
-  estado: joi.boolean().default(true)
+  estado: Joi.boolean().default(true)
 });
+
 
 
 module.exports = {
   getMovimientoSchema,
   getDiariosSchema,
-  getMovimientosQuerySchema,
+
   getMensualesSchema,
   getTrimestralesSchema,
   getSemestralesSchema,
   getAnualesSchema,
+  getMovimientosQuerySchema,
   createMovimientoSchema,
   getOrdenesSchema,
-  getVentasSchema
+  
 
 };
+
+
 
