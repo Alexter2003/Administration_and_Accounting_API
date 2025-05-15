@@ -28,7 +28,7 @@ const AsistenciaSchema = {
     type: DataTypes.TIME,
   },
   hora_salida: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.TIME,
   },
   estado: {
@@ -51,7 +51,7 @@ class Asistencia extends Model {
       sequelize,
       tableName: ASISTENCIA_TABLE,
       modelName: 'Asistencia',
-      timestamps: true,
+      timestamps: false,
     };
   }
 }

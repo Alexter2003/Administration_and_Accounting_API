@@ -38,18 +38,18 @@ const createEmpleadoSchema = joi.object({
 });
 
 const updateEmpleadoSchema = joi.object({
-  dpi: dpi,
-  nombres: nombres,
-  apellidos: apellidos,
-  telefono: telefono,
-  direccion: direccion,
-  nit: nit,
-  genero: genero,
-  id_jornada: id_jornada,
-  email: email,
-  id_rol: id_rol,
-  id_area: id_area,
-  horas_semanales: horas_semanales,
+  dpi: dpi.optional(),
+  nombres: nombres.optional(),
+  apellidos: apellidos.optional(),
+  telefono: telefono.optional(),
+  direccion: direccion.optional(),
+  nit: nit.optional(),
+  genero: genero.optional(),
+  id_jornada: id_jornada.optional(),
+  email: email.optional(),
+  id_rol: id_rol.optional(),
+  id_area: id_area.optional(),
+  horas_semanales: horas_semanales.optional(),
 });
 
 const deleteEmpleadoSchema = joi.object({
