@@ -8,7 +8,6 @@ function generarPasswordAleatoria(length = 10) {
 }
 
 async function validarCamposUnicos(data, excludeId = null) {
-  // Verificar si el DPI ya existe
   if (data.dpi) {
     const existingDpi = await models.Empleado.findOne({ where: { dpi: data.dpi } });
     if (existingDpi && existingDpi.id !== excludeId) {
@@ -16,7 +15,6 @@ async function validarCamposUnicos(data, excludeId = null) {
     }
   }
 
-  // Verificar si el teléfono ya existe
   if (data.telefono) {
     const existingTelefono = await models.Empleado.findOne({ where: { telefono: data.telefono } });
     if (existingTelefono && existingTelefono.id !== excludeId) {
@@ -24,9 +22,8 @@ async function validarCamposUnicos(data, excludeId = null) {
     }
   }
 
-  // Verificar si el correo electrónico ya existe
   if (data.email) {
-    const normalizedEmail = data.email.trim().toLowerCase(); // Normalizar el email
+    const normalizedEmail = data.email.trim().toLowerCase();
     const existingEmail = await models.Empleado.findOne({ where: { email: normalizedEmail } });
     if (existingEmail && existingEmail.id !== excludeId) {
       throw boom.conflict('El correo electrónico ya está registrado');
@@ -39,6 +36,7 @@ class EmpleadosService {
 
   async create(data) {
     try {
+      // Validar campos únicos antes de crear el empleado
       await validarCamposUnicos(data);
 
       // Generar usuario y contraseña
@@ -55,30 +53,41 @@ class EmpleadosService {
         password: hashedPassword,
       });
 
-      // Excluir datos de la respuesta
+      // Crear la asignación
+      const asignacion = await models.EmpleadoAsignacion.create({
+        id_empleado: newEmpleado.id,
+        id_rol: data.id_rol,
+        id_area: data.id_area,
+        horas_semanales: data.horas_semanales,
+      });
+
+      const asignacionCompleta = await models.EmpleadoAsignacion.findOne({
+        where: { id: asignacion.id },
+        include: [
+          { model: models.Rol, as: 'rol' },
+          { model: models.Areas, as: 'area' },
+        ],
+      });
+
+      // Excluir datos sensibles de la respuesta
       const empleadoData = newEmpleado.toJSON();
       delete empleadoData.password;
-      delete empleadoData.usuario;
       delete empleadoData.createdAt;
       delete empleadoData.updatedAt;
 
       return {
         message: 'Empleado creado correctamente',
-        datosEmpleado: {
-          ...empleadoData,
-        },
-        autenticacion: 'Brindar al empleado sus datos inicio de sesión:',
-        datosLogin: {
-          usuario: usuario,
+        autenticacion: {
+          usuario,
           contraseniaTemporal: password,
-        },
+        }
       };
     } catch (error) {
       throw boom.badRequest(error.message);
     }
   }
 
-  async find () {
+  async find() {
     try {
       const empleados = await models.Empleado.findAll({
         attributes: {
@@ -87,14 +96,46 @@ class EmpleadosService {
         where: {
           estado: true,
         },
+        include: [
+          {
+            model: models.EmpleadoAsignacion,
+            as: 'empleado_asignacion',
+            include: [
+              { model: models.Rol, as: 'rol' },
+              { model: models.Areas, as: 'area' },
+            ],
+          },
+        ],
         order: [['id', 'ASC']],
       });
+
       if (empleados.length < 1) {
         throw boom.notFound('No hay empleados activos');
       }
+
+      // Formatear los datos para incluir solo rol y área
+      const empleadosFormateados = empleados.map((empleado) => {
+        const empleadoData = empleado.toJSON();
+        const asignacion = empleadoData.empleado_asignacion || [];
+        delete empleadoData.empleado_asignacion;
+
+      return {
+        empleado: empleadoData,
+        asignacion: asignacion.length > 0
+          ? {
+            id_area: asignacion[0].id_area,
+            area: asignacion[0].area?.nombre,
+            id_rol: asignacion[0].id_rol,
+            rol: asignacion[0].rol?.nombre,
+            horas_semanales: asignacion[0].horas_semanales,
+            }
+          : null,
+      };
+      });
+
       return {
         message: 'Empleados activos encontrados correctamente',
-        data: empleados,
+        empleados: empleadosFormateados,
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -104,86 +145,189 @@ class EmpleadosService {
     }
   }
 
-  async findOne (id) {
+  async findOne(id) {
     try {
       const empleado = await models.Empleado.findByPk(id, {
         attributes: {
           exclude: ['createdAt', 'updatedAt', 'password'],
         },
-        where: {
-          estado: true
-        }
+        include: [
+          {
+            model: models.EmpleadoAsignacion,
+            as: 'empleado_asignacion',
+            include: [
+              { model: models.Rol, as: 'rol' },
+              { model: models.Areas, as: 'area' },
+            ],
+          },
+        ],
       });
 
       if (!empleado) {
         throw boom.notFound('Empleado no encontrado');
       }
-      if (!empleado.estado) {
-        throw boom.conflict('Empleado desactivado');
-      }
+
+      const empleadoData = empleado.toJSON();
+      const asignacion = empleadoData.empleado_asignacion || [];
+      delete empleadoData.empleado_asignacion;
+
       return {
-        message: 'Empleado encontrado correctamente',
-        data: empleado
+        empleado: empleadoData,
+        asignacion: asignacion.length > 0
+          ? {
+            id_area: asignacion[0].id_area,
+            area: asignacion[0].area?.nombre,
+            id_rol: asignacion[0].id_rol,
+            rol: asignacion[0].rol?.nombre,
+            horas_semanales: asignacion[0].horas_semanales,
+            }
+          : null,
       };
     } catch (error) {
-      throw boom.badRequest(error);
+      if (boom.isBoom(error)) {
+        throw error;
+      }
+      throw boom.internal(error);
     }
   }
 
   async update(id, data) {
+    const empleado = await models.Empleado.findByPk(id, {
+      include: [
+        {
+          model: models.EmpleadoAsignacion,
+          as: 'empleado_asignacion',
+          include: [
+            { model: models.Rol, as: 'rol' },
+            { model: models.Areas, as: 'area' },
+          ],
+        },
+      ],
+    });
+
+    if (!empleado) {
+      throw boom.notFound('Empleado no encontrado');
+    }
+
+    await validarCamposUnicos(data, id);
+
+    // Actualizar los datos del empleado
+    const updatedEmpleado = await empleado.update(data);
+
+    // Actualizar o crear la asignacion si se proporciona
+    if (data.id_rol && data.id_area) {
+      const asignacion = await models.EmpleadoAsignacion.findOne({
+        where: { id_empleado: id, estado: true },
+      });
+
+      if (asignacion) {
+        // Actualizar la asignacion existente
+        await asignacion.update({
+          id_rol: data.id_rol,
+          id_area: data.id_area,
+          horas_semanales: data.horas_semanales || asignacion.horas_semanales,
+        });
+      } else {
+        // Crear una nueva asignacion
+        await models.EmpleadoAsignacion.create({
+          id_empleado: id,
+          id_rol: data.id_rol,
+          id_area: data.id_area,
+          horas_semanales: data.horas_semanales,
+          estado: true,
+        });
+      }
+    }
+
+    // Excluir datos sensibles de la respuesta
+    const empleadoData = updatedEmpleado.toJSON();
+    delete empleadoData.password;
+    delete empleadoData.createdAt;
+    delete empleadoData.updatedAt;
+
+    const asignacion = await models.EmpleadoAsignacion.findAll({
+      where: { id_empleado: id, estado: true },
+      include: [
+        { model: models.Rol, as: 'rol' },
+        { model: models.Areas, as: 'area' },
+      ],
+    });
+
+    return {
+      message: 'Empleado actualizado correctamente'
+    };
+  }
+
+  async findEmpleadosAnteriores() {
+    const empleados = await models.Empleado.findAll({
+      attributes: {
+        exclude: ['createdAt', 'updatedAt', 'password'],
+      },
+      where: { estado: false },
+      include: [
+        {
+          model: models.EmpleadoAsignacion,
+          as: 'empleado_asignacion',
+          include: [
+            { model: models.Rol, as: 'rol' },
+            { model: models.Areas, as: 'area' },
+          ],
+        },
+      ],
+      order: [['id', 'ASC']],
+    });
+
+    // Formatear igual que en find()
+    const empleadosFormateados = empleados.map((empleado) => {
+      const empleadoData = empleado.toJSON();
+      const asignacion = empleadoData.empleado_asignacion || [];
+      delete empleadoData.empleado_asignacion;
+
+      return {
+        empleado: empleadoData,
+        asignacion: asignacion.length > 0
+          ? {
+            id_area: asignacion[0].id_area,
+            area: asignacion[0].area?.nombre,
+            id_rol: asignacion[0].id_rol,
+            rol: asignacion[0].rol?.nombre,
+            horas_semanales: asignacion[0].horas_semanales,
+            }
+          : null,
+      };
+    });
+
+    return {
+      message: 'Empleados inactivos encontrados correctamente',
+      empleados: empleadosFormateados,
+    };
+  }
+
+  async delete(id) {
     try {
       const empleado = await models.Empleado.findByPk(id);
       if (!empleado) {
         throw boom.notFound('Empleado no encontrado');
       }
-
-      await validarCamposUnicos(data, id);
-
-      // Encriptar la nueva contraseña si se proporciona
-      if (data.password) {
-        data.password = await bcrypt.hash(data.password, 10);
-      }
-
-      const updatedEmpleado = await empleado.update(data);
-
-      // Excluir datos sensibles de la respuesta
-      const empleadoData = updatedEmpleado.toJSON();
-      delete empleadoData.password;
-      delete empleadoData.createdAt;
-      delete empleadoData.updatedAt;
-
-      return {
-        message: 'Empleado actualizado correctamente',
-        data: empleadoData,
-      };
-    } catch (error) {
-      throw boom.badRequest(error.message);
-    }
-  }
-
-  async delete (id) {
-    try {
-      const empleado = await models.Empleado.findByPk(id, {
-        where: {
-          estado: true
-        }
-      });
-
-      if (!empleado) {
-        throw boom.notFound('Empleado no encontrado');
-      }
       if (!empleado.estado) {
-        throw boom.conflict('Empleado desactivado');
+        throw boom.conflict('El empleado ya está desactivado');
       }
       await empleado.update({ estado: false });
+      //Desactivar asignaciones
+      await models.EmpleadoAsignacion.update(
+        { estado: false },
+        { where: { id_empleado: id, estado: true } }
+      );
       return {
-        message: 'Empleado eliminado correctamente',
+        message: 'Empleado eliminado con éxito'
       };
     } catch (error) {
-      throw boom.badRequest(error);
+      if (boom.isBoom(error)) {
+        throw error;
+      }
+      throw boom.internal(error);
     }
   }
-
 }
 
 module.exports = EmpleadosService;

@@ -18,6 +18,18 @@ const JornadaSchema = {
     allowNull: false,
     type: DataTypes.STRING(255),
   },
+  hora_inicio: {
+    allowNull: false,
+    type: DataTypes.TIME,
+  },
+  hora_fin: {
+    allowNull: false,
+    type: DataTypes.TIME,
+  },
+  dias_laborales: {
+    allowNull: false,
+    type: DataTypes.ARRAY(DataTypes.INTEGER), //ejemplo: [6,7] para sabado y domingo
+  },
   estado: {
     allowNull: false,
     type: DataTypes.BOOLEAN,

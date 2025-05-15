@@ -3,8 +3,8 @@
 const { ESTADO_DETALLE_TABLE } = require('../../src/models/estado_detalle.model');
 
 module.exports = {
-  async up(queryInterface) {
-    const estadosDetalle = [
+  async up (queryInterface, Sequelize) {
+    const estados = [
       {
         nombre: 'Completo',
         descripcion: 'El producto se encuentra completo'
@@ -19,15 +19,18 @@ module.exports = {
       }
     ];
 
-    for (const estado of estadosDetalle) {
-      await queryInterface.sequelize.query(
-        `INSERT INTO "${ESTADO_DETALLE_TABLE}" (nombre, descripcion)
-         SELECT :nombre, :descripcion
-         WHERE NOT EXISTS (
-           SELECT 1 FROM "${ESTADO_DETALLE_TABLE}" WHERE nombre = :nombre
-         );`,
-        { replacements: estado }
-      );
+    // Check for existing records
+    const existingRecords = await queryInterface.sequelize.query(
+      `SELECT nombre FROM "${ESTADO_DETALLE_TABLE}";`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    const existingNames = existingRecords.map(record => record.nombre);
+
+    // Filter out existing records
+    const newRecords = estados.filter(estado => !existingNames.includes(estado.nombre));
+
+    if (newRecords.length > 0) {
+      await queryInterface.bulkInsert(ESTADO_DETALLE_TABLE, newRecords);
     }
   },
 

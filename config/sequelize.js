@@ -13,5 +13,10 @@ const sequelize = new Sequelize({
 });
 
 setupModels(sequelize);
+const models = sequelize.models;
 
-module.exports = sequelize;
+module.exports = {
+  sequelize,
+  Sequelize,
+  models
+};
