@@ -21,6 +21,13 @@ class AutenticacionService {
           as: 'empleado_asignacion',
           include: [
             { model: models.Rol, as: 'rol' },
+            {
+              model: models.Areas,
+              as: 'area',
+              include: [
+                { model: models.Servicio, as: 'servicio' }
+              ]
+            }
           ],
         },
       ],
@@ -45,7 +52,13 @@ class AutenticacionService {
       };
     }
 
-    const roles = asignaciones.map((asignacion) => asignacion.rol.nombre);
+    const roles = asignaciones.map(asignacion => ({
+      id_rol: asignacion.rol.id,
+      rol: asignacion.rol.nombre,
+      id_area: asignacion.area.id,
+      area: asignacion.area.nombre,
+      id_servicio: asignacion.area.servicio.id,
+    }));
 
     return {
       authenticated: true,

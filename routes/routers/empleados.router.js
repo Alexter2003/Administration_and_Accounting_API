@@ -14,6 +14,11 @@ const router = express.Router();
 // Obtener todos los empleados
 router.get('/GET/empleados', (req, res, next) => empleadosController.find(req, res, next));
 
+// Obtener empleados trabajaron previamente en la gasolinera
+router.get('/GET/empleados/bajas', (req, res, next) =>
+  empleadosController.findEmpleadosAnteriores(req, res, next)
+);
+
 // Obtener un empleado por su id
 router.get('/GET/empleados/:id',
   validatorHandler(getEmpleadoSchema, 'params'),
