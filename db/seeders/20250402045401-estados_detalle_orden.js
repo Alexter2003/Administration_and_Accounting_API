@@ -4,8 +4,8 @@ const { ESTADO_DETALLE_TABLE } = require('../../src/models/estado_detalle.model'
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface) {
-    await queryInterface.bulkInsert(ESTADO_DETALLE_TABLE, [
+  async up (queryInterface, Sequelize) {
+    const estados = [
       {
         nombre: 'Completo',
         descripcion: 'El producto se encuentra completo',
@@ -18,7 +18,21 @@ module.exports = {
         nombre: 'No recibido',
         descripcion: 'El producto no se recibio en la orden',
       }
-    ]);
+    ];
+
+    // Check for existing records
+    const existingRecords = await queryInterface.sequelize.query(
+      `SELECT nombre FROM "${ESTADO_DETALLE_TABLE}";`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    const existingNames = existingRecords.map(record => record.nombre);
+
+    // Filter out existing records
+    const newRecords = estados.filter(estado => !existingNames.includes(estado.nombre));
+
+    if (newRecords.length > 0) {
+      await queryInterface.bulkInsert(ESTADO_DETALLE_TABLE, newRecords);
+    }
   },
 
   async down(queryInterface) {
