@@ -39,10 +39,6 @@ class EmpleadosService {
       // Validar campos únicos antes de crear el empleado
       await validarCamposUnicos(data);
 
-      // Validar área y límites de empleados por servicio
-      const area = await this.validarAreaYServicio(data.id_area);
-      await this.validarLimitesDeEmpleados(data.id_area, area.id_servicio);
-
       // Generar usuario y contraseña
       const firstName = data.nombres.split(' ')[0].toLowerCase();
       const lastName = data.apellidos.split(' ')[0].toLowerCase();
@@ -81,15 +77,10 @@ class EmpleadosService {
 
       return {
         message: 'Empleado creado correctamente',
-        datosEmpleado: {
-          ...empleadoData,
-        },
         autenticacion: {
           usuario,
           contraseniaTemporal: password,
-        },
-        rol: asignacionCompleta.rol,
-        area: asignacionCompleta.area,
+        }
       };
     } catch (error) {
       throw boom.badRequest(error.message);
@@ -129,17 +120,19 @@ class EmpleadosService {
         delete empleadoData.empleado_asignacion;
 
         return {
-          datos_personales: empleadoData,
-          empleado_asignacion: asignacion.map((asign) => ({
-            rol: asign.rol || null,
-            area: asign.area || null,
+          empleado: empleadoData,
+          asignacion: asignacion.map(asignacion => ({
+            id_area: asignacion.id_area,
+            area: asignacion.area?.nombre || null,
+            id_rol: asignacion.id_rol,
+            horas_semanales: asignacion.horas_semanales,
           })),
         };
       });
 
       return {
         message: 'Empleados activos encontrados correctamente',
-        data: empleadosFormateados,
+        empleados: empleadosFormateados,
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -177,13 +170,13 @@ class EmpleadosService {
 
       return {
         message: 'Empleado encontrado correctamente',
-        data: {
-          datos_personales: empleadoData,
-          empleado_asignacion: asignacion.map((asign) => ({
-            rol: asign.rol || null,
-            area: asign.area || null,
-          })),
-        },
+        empleado: empleadoData,
+        asignacion: asignacion.map(asignacion => ({
+          id_area: asignacion.id_area,
+          area: asignacion.area?.nombre || null,
+          id_rol: asignacion.id_rol,
+          horas_semanales: asignacion.horas_semanales,
+        })),
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -213,12 +206,6 @@ class EmpleadosService {
 
     await validarCamposUnicos(data, id);
 
-    // Validar limites de empleados por area y servicio si se proporciona un area
-    if (data.id_area) {
-      const area = await this.validarAreaYServicio(data.id_area);
-      await this.validarLimitesDeEmpleados(data.id_area, area.id_servicio);
-    }
-
     // Actualizar los datos del empleado
     const updatedEmpleado = await empleado.update(data);
 
@@ -241,7 +228,7 @@ class EmpleadosService {
           id_empleado: id,
           id_rol: data.id_rol,
           id_area: data.id_area,
-          horas_semanales: data.horas_semanales || 40, // Valor por defecto si no se proporciona
+          horas_semanales: data.horas_semanales,
           estado: true,
         });
       }
@@ -262,53 +249,33 @@ class EmpleadosService {
     });
 
     return {
-      message: 'Empleado actualizado correctamente',
-      datosEmpleado: {
-        ...empleadoData,
-      },
-      empleado_asignacion: asignacion.map((asign) => ({
-        rol: asign.rol || null,
-        area: asign.area || null,
-      })),
+      message: 'Empleado actualizado correctamente'
     };
   }
 
-  async validarAreaYServicio(id_area) {
-    const area = await models.Areas.findByPk(id_area, {
-      include: [{ model: models.Servicio, as: 'servicio' }],
-    });
-
-    if (!area) {
-      throw boom.notFound('Área no encontrada');
-    }
-
-    return area;
-  }
-
-  async validarLimitesDeEmpleados(id_area, id_servicio) {
-    if (id_servicio === 4) { // Servicio de combustible, ya que debe ser 1 empleado por bomba
-      const countBomba = await models.EmpleadoAsignacion.count({
-        where: { id_area, estado: true },
-      });
-      if (countBomba >= 1) {
-        throw boom.conflict('Ya hay un empleado asignado a esta bomba de combustible');
+  async delete(id) {
+    try {
+      const empleado = await models.Empleado.findByPk(id);
+      if (!empleado) {
+        throw boom.notFound('Empleado no encontrado');
       }
-    } else if (id_servicio === 5 || id_servicio === 6) { // Tenda o Mantenimiento, ya que deben tener 3 empleados asignados por servicio
-      const countServicio = await models.EmpleadoAsignacion.count({
-        include: [
-          {
-            model: models.Areas,
-            as: 'area',
-            where: { id_servicio },
-          },
-        ],
-        where: { estado: true },
-      });
-      if (countServicio >= 3) {
-        throw boom.conflict('El servicio ya tiene el máximo número de empleados asignados');
+      if (!empleado.estado) {
+        throw boom.conflict('El empleado ya está desactivado');
       }
-    } else {
-      throw boom.badRequest('Servicio no válido');
+      await empleado.update({ estado: false });
+      //Desactivar asignaciones
+      await models.EmpleadoAsignacion.update(
+        { estado: false },
+        { where: { id_empleado: id, estado: true } }
+      );
+      return {
+        message: 'Empleado eliminado con éxito'
+      };
+    } catch (error) {
+      if (boom.isBoom(error)) {
+        throw error;
+      }
+      throw boom.internal(error);
     }
   }
 }
