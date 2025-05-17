@@ -2,21 +2,20 @@
 
 const { ESTADO_DETALLE_TABLE } = require('../../src/models/estado_detalle.model');
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
     const estados = [
       {
         nombre: 'Completo',
-        descripcion: 'El producto se encuentra completo',
+        descripcion: 'El producto se encuentra completo'
       },
       {
         nombre: 'Incompleto',
-        descripcion: 'El producto se encuentra incompleto',
+        descripcion: 'El producto se encuentra incompleto'
       },
       {
         nombre: 'No recibido',
-        descripcion: 'El producto no se recibio en la orden',
+        descripcion: 'El producto no se recibió en la orden'
       }
     ];
 
@@ -37,7 +36,7 @@ module.exports = {
 
   async down(queryInterface) {
     await queryInterface.bulkDelete(ESTADO_DETALLE_TABLE, {
-      nombre: ['Completo', 'Incompleto', 'No recibido'],
+      nombre: ['Completo', 'Incompleto', 'No recibido']
     });
-  },
+  }
 };

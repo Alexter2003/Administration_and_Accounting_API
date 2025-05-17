@@ -11,6 +11,8 @@ const areasRouter = require('./routers/areas.router');
 const estadosDetalleRouter = require('./routers/estados_detalle.router');
 const estadosOrdenRouter = require('./routers/estados_orden.router');
 const serviciosRouter = require('./routers/servicios.router');
+const movimientosRouter = require('./routers/movimientos.router'); 
+const reembolsosRouter  = require('./routers/reembolsos.router');
 
 function routerApi(app) {
   const router = express.Router();
@@ -28,6 +30,9 @@ function routerApi(app) {
   router.use(estadosOrdenRouter);
   router.use(serviciosRouter);
   
+  router.use(movimientosRouter);
+  router.use('/POST/reembolsos', reembolsosRouter);
+
 }
 
 module.exports = routerApi;

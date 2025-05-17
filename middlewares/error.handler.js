@@ -5,12 +5,13 @@ function logErrors(err, req, res, next) {
 }
 
 //middleware para manejar errores
-function errorHandler(err, req, res) {
+function errorHandler(err, req, res, next) {
   res.status(500).json({
     message: err.message,
     stack: err.stack,
   });
 }
+
 
 //middleware para manejar errores de boom
 function boomErrorHandler(err, req, res, next) {
