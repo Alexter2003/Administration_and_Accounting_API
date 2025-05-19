@@ -1660,3 +1660,421 @@ paths:
                     type: string
                     example: "No se encontraron asistencias en el rango especificado"
 
+  /GET/movimientos:
+    get:
+      summary: Obtener todos los movimientos
+      description: Obtiene una lista de todos los movimientos
+      responses:
+        '200':
+          description: Lista de movimientos obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Movimientos encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        concepto:
+                          type: string
+                        cantidad:
+                          type: number
+                        fecha_movimiento:
+                          type: string
+                          format: date-time
+
+  /GET/movimientos/{id}:
+    get:
+      summary: Obtener movimiento por ID
+      description: Obtiene un movimiento específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movimiento encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Movimiento encontrado correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      concepto:
+                        type: string
+                      cantidad:
+                        type: number
+                      fecha_movimiento:
+                        type: string
+                        format: date-time
+
+  /GET/movimientos/diarios:
+    get:
+      summary: Obtener movimientos diarios
+      description: Obtiene los movimientos de un día específico
+      parameters:
+        - name: fecha
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movimientos diarios encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /GET/movimientos/mensuales:
+    get:
+      summary: Obtener movimientos mensuales
+      description: Obtiene los movimientos de un mes específico
+      parameters:
+        - name: mes
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: año
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movimientos mensuales encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /GET/movimientos/trimestrales:
+    get:
+      summary: Obtener movimientos trimestrales
+      description: Obtiene los movimientos de un trimestre específico
+      parameters:
+        - name: trimestre
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4
+        - name: año
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movimientos trimestrales encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /GET/movimientos/semestrales:
+    get:
+      summary: Obtener movimientos semestrales
+      description: Obtiene los movimientos de un semestre específico
+      parameters:
+        - name: semestre
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2
+        - name: año
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movimientos semestrales encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /GET/movimientos/anuales:
+    get:
+      summary: Obtener movimientos anuales
+      description: Obtiene los movimientos de un año específico
+      parameters:
+        - name: año
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movimientos anuales encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /POST/pagar-salarios:
+    post:
+      summary: Pagar salarios
+      description: Realiza el pago de salarios a los empleados
+      responses:
+        '200':
+          description: Salarios pagados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Salarios pagados correctamente"
+                  data:
+                    type: object
+
+  /POST/reembolsos:
+    post:
+      summary: Crear reembolso
+      description: Crea un nuevo reembolso en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - concepto
+                - cantidad
+                - fecha_movimiento
+                - id_servicio
+              properties:
+                concepto:
+                  type: string
+                  minLength: 5
+                  maxLength: 150
+                cantidad:
+                  type: number
+                  minimum: 0
+                fecha_movimiento:
+                  type: string
+                  format: date-time
+                id_servicio:
+                  type: integer
+      responses:
+        '201':
+          description: Reembolso creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reembolso creado correctamente"
+                  data:
+                    type: object
+
+  /GET/estados_ordenes:
+    get:
+      summary: Obtener estados de orden
+      description: Obtiene una lista de todos los estados posibles para las órdenes
+      responses:
+        '200':
+          description: Estados de orden obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estados de orden encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                        descripcion:
+                          type: string
+
+  /GET/estados_ordenes_detalles:
+    get:
+      summary: Obtener estados de detalle de orden
+      description: Obtiene una lista de todos los estados posibles para los detalles de órdenes
+      responses:
+        '200':
+          description: Estados de detalle obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estados de detalle encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                        descripcion:
+                          type: string
+
+  /GET/servicios:
+    get:
+      summary: Obtener servicios
+      description: Obtiene una lista de todos los servicios disponibles
+      responses:
+        '200':
+          description: Servicios obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Servicios encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                        descripcion:
+                          type: string
+
+  /GET/servicios/{id}:
+    get:
+      summary: Obtener servicio por ID
+      description: Obtiene un servicio específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Servicio encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Servicio encontrado correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      nombre:
+                        type: string
+                      descripcion:
+                        type: string
+        '404':
+          description: Servicio no encontrado
+
