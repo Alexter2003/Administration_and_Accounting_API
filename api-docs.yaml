@@ -1459,3 +1459,204 @@ paths:
                     type: string
                     example: "No se encontró un usuario con ese correo"
 
+  /POST/asistencias:
+    post:
+      summary: Registrar entrada de empleado
+      description: Registra la hora de entrada de un empleado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_empleado
+                - fecha
+                - hora_entrada
+              properties:
+                id_empleado:
+                  type: integer
+                fecha:
+                  type: string
+                  format: date
+                hora_entrada:
+                  type: string
+                  pattern: "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+                  example: "08:00:00"
+      responses:
+        '201':
+          description: Entrada registrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Entrada registrada correctamente"
+                  data:
+                    type: object
+        '400':
+          description: Error en los datos proporcionados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Error en el formato de los datos"
+
+  /PATCH/asistencias/salida:
+    patch:
+      summary: Registrar salida de empleado
+      description: Registra la hora de salida de un empleado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_empleado
+                - fecha
+                - hora_salida
+              properties:
+                id_empleado:
+                  type: integer
+                fecha:
+                  type: string
+                  format: date
+                hora_salida:
+                  type: string
+                  pattern: "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+                  example: "17:00:00"
+      responses:
+        '200':
+          description: Salida registrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Salida registrada correctamente"
+                  data:
+                    type: object
+        '400':
+          description: Error en los datos proporcionados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Error en el formato de los datos"
+
+  /GET/asistencias/empleado/{id}:
+    get:
+      summary: Obtener asistencias por empleado
+      description: Obtiene el registro de asistencias de un empleado específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del empleado
+      responses:
+        '200':
+          description: Asistencias encontradas exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Asistencias encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        fecha:
+                          type: string
+                          format: date
+                        hora_entrada:
+                          type: string
+                        hora_salida:
+                          type: string
+        '404':
+          description: No se encontraron asistencias
+
+  /GET/asistencias:
+    get:
+      summary: Obtener asistencias por rango de fechas
+      description: Obtiene el registro de asistencias dentro de un rango de fechas específico
+      parameters:
+        - name: fecha_inicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha inicial del rango
+        - name: fecha_fin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha final del rango
+      responses:
+        '200':
+          description: Asistencias encontradas exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Asistencias encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        id_empleado:
+                          type: integer
+                        fecha:
+                          type: string
+                          format: date
+                        hora_entrada:
+                          type: string
+                        hora_salida:
+                          type: string
+        '404':
+          description: No se encontraron asistencias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No se encontraron asistencias en el rango especificado"
+
