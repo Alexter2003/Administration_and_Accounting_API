@@ -6,10 +6,10 @@ class OrdenService {
   constructor() {
     // Configuración de endpoints de reabastecimiento por servicio
     this.reabastecimientoEndpoints = {
-      4: process.env.RESTOCK_SERVICE_1_URL || 'http://servicio1/api/restock',
+      4: process.env.RESTOCK_SERVICE_1_URL || 'http://localhost:3002/general-deposit/update/supply',
       5: process.env.RESTOCK_SERVICE_2_URL || 'http://servicio2/api/restock',
-      6: process.env.RESTOCK_SERVICE_3_URL || 'http://servicio3/api/restock',
-      7: process.env.RESTOCK_SERVICE_4_URL || 'http://servicio4/api/restock',
+      6: process.env.RESTOCK_SERVICE_3_URL || 'http://localhost:4000/tallerrepuestos/productos/abastecer',
+      7: process.env.RESTOCK_SERVICE_4_URL || 'http://localhost:8000/pintura/POST/inventarios',
     };
   }
 
@@ -143,7 +143,7 @@ class OrdenService {
       // Datos para el reabastecimiento
       const datosReabastecimiento = {
         productos: detalles.map(detalle => ({
-          producto_id: detalle.id_producto,
+          idProducto: detalle.id_producto,
           cantidad: detalle.cantidad
         }))
       };
