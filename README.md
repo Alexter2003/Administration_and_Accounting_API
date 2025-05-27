@@ -58,6 +58,7 @@ Para aplicar las migraciones de la base de datos,
 ```
 
 ## DESPLIEGUE CON DOCKER COMPOSE
+**Nota:** Si necesitas conectarte a la base de datos PostgreSQL desde fuera de Docker Compose (por ejemplo, usando PgAdmin o DBeaver), usa el puerto 5440 del host.
 
 1. Copia `.env.example` a `.env` y edita tus credenciales.
 2. Levanta los servicios (descargando la imagen desde Docker Hub):
