@@ -1,9 +1,14 @@
+openapi: 3.0.0
+info:
+  title: API de Administración y Contabilidad
+  description: API para la gestión de alertas y proveedores en el sistema
+  version: 1.0.0
 info:
   title: API de Administración y Contabilidad
   description: API para la gestión de alertas y proveedores en el sistema
   version: 1.0.0
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3000/api/administracion
     description: Servidor de desarrollo
 paths:
   /GET/alertas:

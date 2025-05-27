@@ -1,5 +1,8 @@
 const express = require('express');
 //const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./api-docs.yaml');
 const routerApi = require('./routes');
 const {
   logErrors,
@@ -26,6 +29,8 @@ app.use(express.json());
 //   },
 // };
 // app.use(cors(corsOptions));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get('/', (req, res) => {
   res.send('PROYECTO ARQUI');
