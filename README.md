@@ -56,3 +56,20 @@ Para aplicar las migraciones de la base de datos,
 ```bash
  npm run migrations:run
 ```
+
+## DESPLIEGUE CON DOCKER COMPOSE
+
+1. Copia `.env.example` a `.env` y edita tus credenciales.
+2. Levanta los servicios (descargando la imagen desde Docker Hub):
+```bash
+ docker-compose up -d
+```
+3. Ejecuta las migraciones dentro del contenedor:
+```bash
+ docker-compose exec app npm run migrations:run
+```
+4. Ejecuta los seeders dentro del contenedor:
+```bash
+ docker-compose exec app npx sequelize-cli db:seed:all
+```
+5. El servicio estará disponible en http://localhost:3000 (o en la IP del servidor).
