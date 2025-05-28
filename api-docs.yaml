@@ -8,7 +8,7 @@ info:
   description: API para la gestión de alertas y proveedores en el sistema
   version: 1.0.0
 servers:
-  - url: http://localhost:3000/api/administracion
+  - url: http://localhost:3000/administracion
     description: Servidor de desarrollo
 paths:
   /GET/alertas:
