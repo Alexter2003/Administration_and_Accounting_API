@@ -11,12 +11,12 @@ const areasRouter = require('./routers/areas.router');
 const estadosDetalleRouter = require('./routers/estados_detalle.router');
 const estadosOrdenRouter = require('./routers/estados_orden.router');
 const serviciosRouter = require('./routers/servicios.router');
-const movimientosRouter = require('./routers/movimientos.router'); 
+const movimientosRouter = require('./routers/movimientos.router');
 const reembolsosRouter  = require('./routers/reembolsos.router');
 
 function routerApi(app) {
   const router = express.Router();
-  app.use('/api/administracion', router);
+  app.use('/administracion', router);
   router.use(alertaRouter);
   router.use(proveedorRouter);
   router.use(empleadoRouter);
@@ -29,7 +29,7 @@ function routerApi(app) {
   router.use(estadosDetalleRouter);
   router.use(estadosOrdenRouter);
   router.use(serviciosRouter);
-  
+
   router.use(movimientosRouter);
   router.use('/POST/reembolsos', reembolsosRouter);
 
