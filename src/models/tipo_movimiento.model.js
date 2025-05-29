@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Sequelize } = require('sequelize');
 
 const TIPO_MOVIMIENTO_TABLE = 'tipo_movimientos';
 
@@ -12,9 +12,10 @@ const TipoMovimientoSchema = {
   nombre: {
     allowNull: false,
     type: DataTypes.STRING(50),
+    unique: true,
   },
   descripcion: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.STRING(150),
   },
   estado: {
@@ -22,13 +23,22 @@ const TipoMovimientoSchema = {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  createdAt: {
+    allowNull: true,
+    type: DataTypes.DATE,
+    defaultValue: Sequelize.NOW,
+  },
+  updatedAt: {
+    allowNull: true,
+    type: DataTypes.DATE,
+  }
 };
 
 class TipoMovimiento extends Model {
   static associate(models) {
     this.hasMany(models.Movimiento, {
       as: 'movimientos',
-      foreignKey: 'id_tipo_movimiento',
+      foreignKey: 'id_tipo_movimiento'
     });
   }
 
@@ -37,13 +47,9 @@ class TipoMovimiento extends Model {
       sequelize,
       tableName: TIPO_MOVIMIENTO_TABLE,
       modelName: 'TipoMovimiento',
-      timestamps: false,
+      timestamps: false
     };
   }
 }
 
-module.exports = {
-  TIPO_MOVIMIENTO_TABLE,
-  TipoMovimientoSchema,
-  TipoMovimiento,
-};
+module.exports = { TIPO_MOVIMIENTO_TABLE, TipoMovimientoSchema, TipoMovimiento };
