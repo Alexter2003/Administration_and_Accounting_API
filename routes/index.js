@@ -13,6 +13,8 @@ const estadosOrdenRouter = require('./routers/estados_orden.router');
 const serviciosRouter = require('./routers/servicios.router');
 const movimientosRouter = require('./routers/movimientos.router');
 const reembolsosRouter  = require('./routers/reembolsos.router');
+const tipoMovimientoRouter = require('./routers/tipo_movimiento.router');
+
 
 function routerApi(app) {
   const router = express.Router();
@@ -32,6 +34,8 @@ function routerApi(app) {
 
   router.use(movimientosRouter);
   router.use('/POST/reembolsos', reembolsosRouter);
+  router.use('/GET/tipo_movimientos', tipoMovimientoRouter);
+
 
 }
 
