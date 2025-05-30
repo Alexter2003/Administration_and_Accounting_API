@@ -7,7 +7,7 @@ class MovimientosService {
   async create(data) {
     try {
       const mov = await models.Movimiento.create(data);
-      return { message: 'Movimiento creado correctamente', data: mov };
+      return 'Movimiento creado correctamente';
     } catch (err) {
       throw boom.badRequest(err);
     }
@@ -263,7 +263,7 @@ async obtenerOrdenes({ desde, hasta }) {
 }
 
 
-  
+
 }
 
 module.exports = MovimientosService;

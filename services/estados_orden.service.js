@@ -14,8 +14,7 @@ class EstadosOrdenService {
     }
 
     return {
-      message: 'Estados encontrados correctamente',
-      data: estados,
+      estados_ordenes: estados,
     };
   }
 }

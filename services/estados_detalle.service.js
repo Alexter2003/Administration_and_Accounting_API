@@ -13,8 +13,7 @@ class EstadosDetalleService {
     }
 
     return {
-      message: 'Estados encontrados correctamente',
-      data: estados,
+      estados_ordenes_detalles: estados,
     };
   }
 }

@@ -6,11 +6,8 @@ class RolesService {
 
   async create (data) {
     try {
-      const newRol = await models.Rol.create(data);
-      return {
-        message: 'Rol creado correctamente',
-        data: newRol,
-      };
+      await models.Rol.create(data);
+      return 'Rol creado correctamente';
     } catch (error) {
       throw boom.badRequest(error);
     }
@@ -32,7 +29,7 @@ class RolesService {
       }
       return {
         message: 'Roles activos encontrados correctamente',
-        data: roles,
+        roles: roles,
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -58,7 +55,7 @@ class RolesService {
       }
       return {
         message: 'Rol encontrado correctamente',
-        data: rol
+        rol: rol
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -83,11 +80,8 @@ class RolesService {
         throw boom.conflict('Rol desactivado');
       }
 
-      const updatedRol = await rol.update(data);
-      return {
-        message: 'Rol actualizado correctamente',
-        data: updatedRol,
-      };
+      await rol.update(data);
+      return 'Rol actualizado correctamente';
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;
@@ -111,9 +105,7 @@ class RolesService {
         throw boom.conflict('Rol desactivado');
       }
       await rol.update({ estado: false });
-      return {
-        message: 'Rol eliminado correctamente',
-      };
+      return 'Rol eliminado correctamente';
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;

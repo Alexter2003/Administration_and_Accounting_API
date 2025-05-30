@@ -6,10 +6,9 @@ const service = new AsistenciasService();
 class AsistenciasController {
   async create(req, res, next) {
     try {
-      const asistencia = await service.create(req.body);
+      await service.create(req.body);
       res.status(201).json({
         message: 'Asistencia - Hora de entrada registrada correctamente',
-        asistencia: asistencia,
       });
     } catch (error) {
       next(error);
@@ -20,10 +19,9 @@ class AsistenciasController {
     try {
       const { id_empleado, fecha, hora_salida } = req.body;
 
-      const asistencia = await service.updateSalidaByEmpleado(id_empleado, fecha, hora_salida);
+      await service.updateSalidaByEmpleado(id_empleado, fecha, hora_salida);
       res.status(200).json({
         message: 'Asistencia - Hora de salida registrada correctamente',
-        asistencia: asistencia,
       });
     } catch (error) {
       next(error);

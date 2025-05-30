@@ -17,7 +17,7 @@ class JornadasService {
       }
       return {
         message: 'Jornadas activas encontradas correctamente',
-        data: jornadas,
+        jornadas: jornadas,
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -43,7 +43,7 @@ class JornadasService {
       }
       return {
         message: 'Jornada encontrada correctamente',
-        data: jornada
+        jornada: jornada
       };
     } catch (error) {
       throw boom.badRequest(error);

@@ -12,7 +12,7 @@ class TipoMovimientoService {
       attributes: { exclude: ['createdAt', 'updatedAt'] },
       order: [['id', 'ASC']],
     });
-    return { message: 'Tipos de movimientos encontrados', data: lista };
+    return { message: 'Tipos de movimientos encontrados', tipo_movimientos: lista };
   }
 
   async findOne(id) {
@@ -22,7 +22,7 @@ class TipoMovimientoService {
   if (!tipo) throw boom.notFound('Tipo de movimiento no encontrado');
   return {
     message: 'Tipo de movimiento encontrado',
-    data: tipo,
+    tipo_movimiento: tipo,
   };
 }
 

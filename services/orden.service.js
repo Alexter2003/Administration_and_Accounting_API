@@ -24,7 +24,7 @@ class OrdenService {
       }
       return {
         message: 'Ordenes activas encontradas correctamente',
-        data: ordenes,
+        ordenes: ordenes,
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -70,7 +70,7 @@ class OrdenService {
       }
       return {
         message: 'Orden encontrada correctamente',
-        data: orden,
+        orden: orden,
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -118,10 +118,7 @@ class OrdenService {
       // Si todo sale bien hacer commit de la transacción
       await transaction.commit();
 
-      return {
-        message: 'Orden creada correctamente',
-        data: newOrden,
-      };
+      return 'Orden creada correctamente';
     } catch (error) {
       // Para caso de error se hace un rollback de la transacción
       await transaction.rollback();
@@ -212,17 +209,13 @@ class OrdenService {
         }));
 
         await transaction.commit();
-        return {
-          message: 'Estado de orden actualizado correctamente y detalles actualizados'
-        };
+        return 'Estado de orden actualizado correctamente y detalles actualizados';
       }
 
       await transaction.commit();
 
       // Respuesta normal para otros cambios de estado
-      return {
-        message: 'Estado de orden actualizado correctamente'
-      };
+      return 'Estado de orden actualizado correctamente';
 
     } catch (error) {
       await transaction.rollback();
@@ -278,9 +271,7 @@ class OrdenService {
 
       await transaction.commit();
 
-      return {
-        message: 'Estado del detalle actualizado correctamente'
-      };
+      return 'Estado del detalle actualizado correctamente';
     } catch (error) {
       await transaction.rollback();
 

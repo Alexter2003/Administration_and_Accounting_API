@@ -253,9 +253,7 @@ class EmpleadosService {
       ],
     });
 
-    return {
-      message: 'Empleado actualizado correctamente'
-    };
+    return 'Empleado actualizado correctamente';
   }
 
   async findEmpleadosAnteriores() {
@@ -318,9 +316,7 @@ class EmpleadosService {
         { estado: false },
         { where: { id_empleado: id, estado: true } }
       );
-      return {
-        message: 'Empleado eliminado con éxito'
-      };
+      return 'Empleado eliminado con éxito';
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;

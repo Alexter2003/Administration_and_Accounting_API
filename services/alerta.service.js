@@ -6,11 +6,8 @@ class AlertaService {
 
   async create(data) {
     try {
-      const newAlerta = await models.Alerta.create(data);
-      return {
-        message: 'Alerta creada correctamente',
-        data: newAlerta,
-      };
+      await models.Alerta.create(data);
+      return 'Alerta agregada con exito';
     } catch (error) {
       throw boom.badRequest(error);
     }
@@ -32,7 +29,7 @@ class AlertaService {
       }
       return {
         message: 'Alertas activas encontradas correctamente',
-        data: alertas,
+        alertas: alertas,
       };
     } catch (error) {
       throw boom.badRequest(error);
@@ -43,18 +40,12 @@ class AlertaService {
     try {
       const alerta = await models.Alerta.findByPk(id, {
         attributes: {
-          exclude: ['createdAt', 'updatedAt', 'id_servicio'],
+          exclude: ['createdAt', 'updatedAt'],
         },
         where: {
           estado: true,
         },
-        include: [
-          {
-            model: models.Servicio,
-            as: 'servicio',
-            attributes: ['id', 'nombre'],
-          },
-        ],
+
       });
 
       if (!alerta) {
@@ -77,9 +68,7 @@ class AlertaService {
         throw boom.notFound('Alerta no encontrada');
       }
       await alerta.update({ estado: false });
-      return {
-        message: 'Alerta eliminada correctamente',
-      };
+      return 'Alerta desactivada con exito';
     } catch (error) {
       throw boom.badRequest(error);
     }

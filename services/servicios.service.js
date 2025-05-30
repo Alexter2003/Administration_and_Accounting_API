@@ -15,7 +15,7 @@ class ServiciosService {
 
     return {
       message: 'Servicios encontrados correctamente',
-      data: servicios,
+      servicios: servicios,
     };
   }
 
@@ -28,7 +28,7 @@ class ServiciosService {
 
     return {
       message: 'Servicio encontrado correctamente',
-      data: servicio,
+      servicio: servicio,
     };
   }
 }
