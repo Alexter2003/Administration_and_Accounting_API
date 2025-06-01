@@ -4,53 +4,220 @@ const { models } = require('../config/sequelize');
 const { Op } = require('sequelize');
 
 class MovimientosService {
+  async obtenerMovimientosAgrupados({ fechaInicio, fechaFin, id_servicio, incluirExternos = false }) {
+    const where = { estado: true };
+    if (id_servicio) where.id_servicio = id_servicio;
+    let movs = await models.Movimiento.findAll({ where });
+
+    // Filtro de fechas robusto
+    if (fechaInicio && fechaFin) {
+      const inicio = this.soloFecha(fechaInicio);
+      const fin = this.soloFecha(fechaFin);
+      movs = movs.filter(mov => {
+        let fechaMov;
+        if (typeof mov.fecha_movimiento === 'string' && mov.fecha_movimiento.includes('/')) {
+          const [dia, mes, anio] = mov.fecha_movimiento.split('/');
+          fechaMov = new Date(anio, mes - 1, dia);
+        } else {
+          fechaMov = new Date(mov.fecha_movimiento);
+        }
+        if (inicio.getTime() === fin.getTime()) {
+          return (
+            fechaMov.getFullYear() === inicio.getFullYear() &&
+            fechaMov.getMonth() === inicio.getMonth() &&
+            fechaMov.getDate() === inicio.getDate()
+          );
+        }
+        return fechaMov.getTime() >= inicio.getTime() && fechaMov.getTime() <= fin.getTime();
+      });
+    }
+
+    // Procesa compras para obtener id_producto
+    const compras = await Promise.all(
+      movs.filter(m => m.id_tipo_movimiento === 2).map(async compra => {
+        try {
+          const ordenId = compra.concepto.split(' ').pop();
+          const { data } = await axios.get(`http://localhost:3000/administracion/GET/ordenes/${ordenId}`);
+          const detalles = data.orden?.orden_detalles || [];
+          return detalles.length
+            ? detalles.map(det => ({
+                id: compra.id,
+                concepto: compra.concepto,
+                cantidad: Number(compra.cantidad),
+                fecha_movimiento: new Date(compra.fecha_movimiento).toISOString().split('T')[0],
+                id_servicio: compra.id_servicio,
+                id_producto: det.id_producto
+              }))
+            : [{
+                id: compra.id,
+                concepto: compra.concepto,
+                cantidad: Number(compra.cantidad),
+                fecha_movimiento: new Date(compra.fecha_movimiento).toISOString().split('T')[0],
+                id_servicio: compra.id_servicio,
+                id_producto: null
+              }];
+        } catch {
+          return [{
+            id: compra.id,
+            concepto: compra.concepto,
+            cantidad: Number(compra.cantidad),
+            fecha_movimiento: new Date(compra.fecha_movimiento).toISOString().split('T')[0],
+            id_servicio: compra.id_servicio,
+            id_producto: null
+          }];
+        }
+      })
+    );
+
+    // Ventas y devoluciones externas solo si se piden
+    let ventasExternas = [], devolucionesExternas = [];
+    if (incluirExternos) {
+      const [transResp, devolResp] = await Promise.all([
+        axios.get('http://64.23.169.22:3001/pagos/transacciones/obtener'),
+        axios.get('http://64.23.169.22:3001/pagos/devoluciones/obtener')
+      ]);
+      const transacciones = (transResp.data.Transacciones || []).filter(tx => tx.Estado === 1);
+
+      devolucionesExternas = (devolResp.data.Devoluciones || [])
+        .filter(dev => dev.Estado === 1)
+        .filter(dev => {
+          const fechaDev = this.soloFecha(dev.Fecha);
+          if (!fechaDev) return false;
+          let fechaOk = true, servicioOk = true;
+          if (fechaInicio && fechaFin) {
+            const inicio = this.soloFecha(fechaInicio);
+            const fin = this.soloFecha(fechaFin);
+            if (inicio.getTime() === fin.getTime()) {
+              fechaOk = fechaDev.getTime() === inicio.getTime();
+            } else {
+              fechaOk = fechaDev.getTime() >= inicio.getTime() && fechaDev.getTime() <= fin.getTime();
+            }
+          }
+          if (id_servicio) servicioOk = dev.id_servicio == id_servicio;
+          return fechaOk && servicioOk;
+        })
+        .map(dev => ({
+          id: dev.NoDevolucion,
+          concepto: dev.Descripcion || "Devolución",
+          cantidad: dev.Monto,
+          fecha_movimiento: new Date(dev.Fecha).toISOString().split('T')[0],
+          NotaCredito: dev.NotaCredito
+        }));
+
+      ventasExternas = [];
+      await Promise.all(transacciones.filter(tx => tx.NoFactura).map(async tx => {
+        const fechaTx = this.soloFecha(tx.Fecha);
+        if (!fechaTx) return;
+        let fechaOk = true, servicioOk = true;
+        if (fechaInicio && fechaFin) {
+          const inicio = this.soloFecha(fechaInicio);
+          const fin = this.soloFecha(fechaFin);
+          if (inicio.getTime() === fin.getTime()) {
+            fechaOk = fechaTx.getTime() === inicio.getTime();
+          } else {
+            fechaOk = fechaTx.getTime() >= inicio.getTime() && fechaTx.getTime() <= fin.getTime();
+          }
+        }
+        if (id_servicio) servicioOk = tx.ServiciosTransaccion == id_servicio;
+        if (!fechaOk || !servicioOk) return;
+        try {
+          const factura = (await axios.get(`http://64.23.169.22:3001/pagos/facturas/obtener/${tx.NoFactura}`)).data.factura;
+          (factura?.Detalle || []).forEach(prod => {
+            ventasExternas.push({
+              id: tx.NoTransaccion,
+              concepto: tx.NoFactura,
+              cantidad: prod.Precio * prod.Cantidad,
+              fecha_movimiento: new Date(tx.Fecha).toISOString().split('T')[0],
+              id_servicio: tx.ServiciosTransaccion,
+              producto: prod.Producto
+            });
+          });
+        } catch {}
+      }));
+      ventasExternas.sort((a, b) => a.concepto.localeCompare(b.concepto));
+    }
+
+    return this.agruparMovimientos(
+      movs.filter(m => m.id_tipo_movimiento !== 2),
+      ventasExternas,
+      devolucionesExternas,
+      compras.flat()
+    );
+  }
+
+  agruparMovimientos(movs, ventasExternas = [], devolucionesExternas = [], comprasProcesadas = null) {
+    const salarios = movs
+      .filter(m => m.id_tipo_movimiento === 1)
+      .map(sal => ({
+        id: sal.id,
+        concepto: sal.concepto,
+        cantidad: Number(sal.cantidad),
+        fecha_movimiento: new Date(sal.fecha_movimiento).toISOString().split('T')[0],
+        id_servicio: sal.id_servicio,
+        nombre_empleado: sal.nombre_empleado
+      }));
+
+    const compras = (comprasProcesadas || movs
+      .filter(m => m.id_tipo_movimiento === 2)
+      .map(compra => ({
+        id: compra.id,
+        concepto: compra.concepto,
+        cantidad: Number(compra.cantidad),
+        fecha_movimiento: new Date(compra.fecha_movimiento).toISOString().split('T')[0],
+        id_servicio: compra.id_servicio,
+        id_producto: compra.id_producto
+      })));
+
+    const ventas = ventasExternas.map(venta => ({
+      ...venta,
+      cantidad: Number(venta.cantidad)
+    }));
+
+    const devoluciones = devolucionesExternas.map(dev => ({
+      ...dev,
+      cantidad: Number(dev.cantidad)
+    }));
+
+    return {
+      "Pago de salarios": {
+        total_monetario: salarios.reduce((sum, s) => sum + Number(s.cantidad), 0),
+        movimientos: salarios
+      },
+      "Compras": {
+        total_monetario: compras.reduce((sum, c) => sum + Number(c.cantidad), 0),
+        movimientos: compras
+      },
+      "Ventas": {
+        total_monetario: ventas.reduce((sum, v) => sum + Number(v.cantidad), 0),
+        movimientos: ventas
+      },
+      "Devoluciones": {
+        total_monetario: devoluciones.reduce((sum, d) => sum + Number(d.cantidad), 0),
+        movimientos: devoluciones
+      }
+    };
+  }
+
+  soloFecha(date) {
+    if (!date) return null;
+    let d = date;
+    if (typeof date === 'string') d = new Date(date);
+    if (!(d instanceof Date) || isNaN(d)) return null;
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  }
+
   async create(data) {
     try {
-      const mov = await models.Movimiento.create(data);
+      await models.Movimiento.create(data);
       return 'Movimiento creado correctamente';
     } catch (err) {
       throw boom.badRequest(err);
     }
   }
 
-async findAll() {
-  // Rango del año actual (puedes ajustarlo si es necesario)
-  const hoy = new Date();
-  const año = hoy.getFullYear();
-  const primerDia = `${año}-01-01`;
-  const ultimoDia = `${año}-12-31`;
-
-  const id_servicio = 1; // puedes ajustar esto dinámicamente si deseas
-
-  // Sincronizar órdenes y ventas antes de obtener movimientos
-  try {
-    await this.obtenerOrdenes({ desde: primerDia, hasta: ultimoDia, id_servicio });
-  } catch (e) {
-    console.warn('No se sincronizaron órdenes:', e.output?.payload?.message || e.message);
+  async findAll() {
+    return await this.obtenerMovimientosAgrupados({ incluirExternos: true });
   }
-
-  try {
-    await this.obtenerVentas({ desde: primerDia, hasta: ultimoDia, id_servicio });
-  } catch (e) {
-    console.warn('No se sincronizaron ventas:', e.output?.payload?.message || e.message);
-  }
-
-  // Obtener todos los movimientos después de sincronizar
-  const movimientos = await models.Movimiento.findAll({
-    attributes: { exclude: ['createdAt', 'updatedAt'] },
-    order: [['fecha_movimiento', 'DESC']],
-  });
-
-  if (movimientos.length === 0) {
-    throw boom.notFound('No hay movimientos registrados');
-  }
-
-  return {
-    message: 'Movimientos obtenidos correctamente',
-    data: movimientos,
-  };
-}
-
 
   async findOne(id) {
     const mov = await models.Movimiento.findByPk(id);
@@ -58,212 +225,141 @@ async findAll() {
     return { message: 'Movimiento encontrado', data: mov };
   }
 
-async findDiarios({ fecha, id_servicio }) {
-  const where = { fecha_movimiento: fecha, estado: true };
-  if (id_servicio) {
-    where.id_servicio = id_servicio;
+  async findDiarios({ fecha_dia, id_servicio }) {
+    return await this.obtenerMovimientosAgrupados({
+      fechaInicio: fecha_dia,
+      fechaFin: fecha_dia,
+      id_servicio,
+      incluirExternos: true
+    });
   }
 
-  const movs = await models.Movimiento.findAll({ where });
-  if (!movs.length) throw boom.notFound('No hay movimientos diarios para esa fecha');
-  return { message: 'Movimientos diarios encontrados', data: movs };
-}
-
-
-
-async findMensuales({ mes, año, id_servicio }) {
-  const primerDia = new Date(año, mes - 1, 1);
-  const ultimoDia = new Date(año, mes, 0);
-
-  const where = {
-    fecha_movimiento: { [Op.gte]: primerDia, [Op.lte]: ultimoDia },
-    estado: true
-  };
-
-  if (id_servicio) {
-    where.id_servicio = id_servicio;
+  async findMensuales({ fecha_mes, año, id_servicio }) {
+    const primerDia = new Date(año, fecha_mes - 1, 1);
+    const ultimoDia = new Date(año, fecha_mes, 0);
+    return await this.obtenerMovimientosAgrupados({
+      fechaInicio: primerDia,
+      fechaFin: ultimoDia,
+      id_servicio,
+      incluirExternos: true
+    });
   }
 
-  const movs = await models.Movimiento.findAll({
-    where,
-    order: [['fecha_movimiento', 'ASC']]
-  });
-
-  if (!movs.length) throw boom.notFound('No hay movimientos mensuales en ese rango');
-  return { message: 'Movimientos mensuales encontrados', data: movs };
-}
-
-
-
-async findTrimestrales({ trimestre, año, id_servicio }) {
-  const inicioMes = (trimestre - 1) * 3;
-  const finMes = inicioMes + 2;
-  const primerDia = new Date(año, inicioMes, 1);
-  const ultimoDia = new Date(año, finMes + 1, 0);
-
-  const where = {
-    fecha_movimiento: { [Op.gte]: primerDia, [Op.lte]: ultimoDia },
-    estado: true
-  };
-  if (id_servicio) {
-    where.id_servicio = id_servicio;
+  async findTrimestrales({ numero_trimestre, año, id_servicio }) {
+    const inicioMes = (numero_trimestre - 1) * 3;
+    const finMes = inicioMes + 2;
+    const primerDia = new Date(año, inicioMes, 1);
+    const ultimoDia = new Date(año, finMes + 1, 0);
+    return await this.obtenerMovimientosAgrupados({
+      fechaInicio: primerDia,
+      fechaFin: ultimoDia,
+      id_servicio,
+      incluirExternos: true
+    });
   }
 
-  const movs = await models.Movimiento.findAll({ where });
-  if (!movs.length) throw boom.notFound('No hay movimientos trimestrales en ese rango');
-  return { message: 'Movimientos trimestrales encontrados', data: movs };
-}
-
-
-
-async findSemestrales({ semestre, año, id_servicio }) {
-  const inicioMes = (semestre - 1) * 6;
-  const finMes = inicioMes + 5;
-  const primerDia = new Date(año, inicioMes, 1);
-  const ultimoDia = new Date(año, finMes + 1, 0);
-
-  const where = {
-    fecha_movimiento: { [Op.gte]: primerDia, [Op.lte]: ultimoDia },
-    estado: true
-  };
-  if (id_servicio) {
-    where.id_servicio = id_servicio;
+  async findSemestrales({ numero_semestre, año, id_servicio }) {
+    const inicioMes = (numero_semestre - 1) * 6;
+    const finMes = inicioMes + 5;
+    const primerDia = new Date(año, inicioMes, 1);
+    const ultimoDia = new Date(año, finMes + 1, 0);
+    return await this.obtenerMovimientosAgrupados({
+      fechaInicio: primerDia,
+      fechaFin: ultimoDia,
+      id_servicio,
+      incluirExternos: true
+    });
   }
 
-  const movs = await models.Movimiento.findAll({ where });
-  if (!movs.length) throw boom.notFound('No hay movimientos semestrales en ese rango');
-  return { message: 'Movimientos semestrales encontrados', data: movs };
-}
-
-
-async findAnuales({ año, id_servicio }) {
-  const primerDia = new Date(año, 0, 1);
-  const ultimoDia = new Date(año, 11, 31);
-
-  const where = {
-    fecha_movimiento: { [Op.gte]: primerDia, [Op.lte]: ultimoDia },
-    estado: true
-  };
-  if (id_servicio) {
-    where.id_servicio = id_servicio;
+  async findAnuales({ año, id_servicio }) {
+    const primerDia = new Date(año, 0, 1);
+    const ultimoDia = new Date(año, 11, 31);
+    return await this.obtenerMovimientosAgrupados({
+      fechaInicio: primerDia,
+      fechaFin: ultimoDia,
+      id_servicio,
+      incluirExternos: true
+    });
   }
 
-  const movs = await models.Movimiento.findAll({ where });
-  if (!movs.length) throw boom.notFound('No hay movimientos anuales en ese rango');
-  return { message: 'Movimientos anuales encontrados', data: movs };
-}
-
-
-async obtenerSalarios() {
-  // 1. Obtener asignaciones activas con empleados activos y rol asociado
+  async obtenerSalarios() {
   const asignaciones = await models.EmpleadoAsignacion.findAll({
     where: { estado: true },
     include: [
-      {
-        model: models.Empleado,
-        as: 'empleado',
-        where: { estado: true },
-      },
-      {
-        model: models.Rol,
-        as: 'rol'
-      }
+      { model: models.Empleado, as: 'empleado', where: { estado: true } },
+      { model: models.Rol, as: 'rol' },
+      { model: models.Areas, as: 'area', include: [{ model: models.Servicio, as: 'servicio' }] }
     ]
   });
+  if (!asignaciones.length) throw boom.notFound('No hay empleados activos con rol asignado');
+  const fechaActual = new Date();
+  const fechaISO = fechaActual.toISOString().split('T')[0];
+  const mesActual = fechaISO.slice(0, 7);
+  const [anio, mes] = mesActual.split('-');
+  const ultimoDia = new Date(anio, mes, 0).getDate();
+  const finMes = `${mesActual}-${ultimoDia}`;
 
-  if (!asignaciones.length) {
-    throw boom.notFound('No hay empleados activos con rol asignado');
-  }
-
-  const fechaActual = new Date().toISOString().split('T')[0];
-
-  const movimientos = asignaciones.map((asig) => ({
-    id_tipo_movimiento: 1, // salario
-    id_servicio: 2, // ajustable si hace falta
-    concepto: `Pago de salario para rol ${asig.rol.descripcion}`,
-    cantidad: asig.rol.salario,
-    fecha_movimiento: fechaActual,
-    estado: true,
-  }));
-
-  const result = await models.Movimiento.bulkCreate(movimientos);
-
-  return {
-    message: 'Salarios pagados e insertados como movimientos',
-    data: result,
-  };
-}
-
-
-
-async obtenerOrdenes({ desde, hasta }) {
-  // 1) Todos los movimentos de tipo orden en el rango, de cualquier servicio
-  const existentes = await models.Movimiento.findAll({
-    where: {
-      id_tipo_movimiento: 2,
-      fecha_movimiento: { [Op.between]: [desde, hasta] },
-    },
-  });
-
-  // 2) Crea el set de claves únicas (incluyendo el servicio)
-  const yaInsertadas = new Set(
-    existentes.map(m => {
-      const concepto = m.concepto;
-      const cantidad = Number(m.cantidad).toFixed(2);
-      const fecha    = new Date(m.fecha_movimiento)
-                          .toISOString().split('T')[0];
-      const servicio = m.id_servicio;
-      return `${concepto}_${cantidad}_${fecha}_${servicio}`;
-    })
-  );
-
-  // 3) Llama al microservicio de órdenes (sin filtrar por servicio)
-  let ordenes;
-  try {
-    const resp = await axios.get('http://localhost:3000/api/administracion/GET/ordenes', {
-      params: { desde, hasta } // <–– ya no pasa id_servicio
+  const movimientos = await Promise.all(asignaciones.map(async asig => {
+    const nombre = `${asig.empleado.nombres} ${asig.empleado.apellidos}`.trim();
+    const yaPagado = await models.Movimiento.findOne({
+      where: {
+        id_tipo_movimiento: 1,
+        nombre_empleado: nombre,
+        fecha_movimiento: { [Op.gte]: `${mesActual}-01`, [Op.lte]: finMes }
+      }
     });
-    ordenes = resp.data.data;
-    if (!Array.isArray(ordenes)) {
-      throw boom.badGateway('Respuesta de órdenes no es un array');
-    }
-  } catch (err) {
-    throw boom.badGateway('No se pudo obtener datos del microservicio de órdenes');
-  }
-
-  // 4) Filtra y conserva sólo las NO insertadas aún
-  const nuevas = ordenes.filter(o => {
-    const concepto = `Pago de orden ${o.id}`;
-    const cantidad = Number(o.costo_total).toFixed(2);
-    const fecha    = new Date(o.fecha_orden)
-                        .toISOString().split('T')[0];
-    const servicio = o.id_servicio;
-    const clave    = `${concepto}_${cantidad}_${fecha}_${servicio}`;
-    return !yaInsertadas.has(clave);
+    return yaPagado ? null : {
+      id_tipo_movimiento: 1,
+      id_servicio: asig.area?.servicio?.id,
+      concepto: `Pago de salario para rol ${asig.rol.descripcion}`,
+      cantidad: asig.rol.salario,
+      fecha_movimiento: fechaISO, // Siempre ISO
+      nombre_empleado: nombre,
+      estado: true,
+    };
+  }));
+  const nuevos = movimientos.filter(Boolean);
+  if (!nuevos.length) return { message: 'Ya se pagaron los salarios de este mes', salarios: [] };
+  const result = await models.Movimiento.bulkCreate(nuevos, { returning: true });
+  const salarios = result.map(mov => {
+    const obj = mov.toJSON();
+    delete obj.createdAt;
+    delete obj.updatedAt;
+    return obj;
   });
-
-  // 5) Inserta las nuevas usando el id_servicio real de cada orden
-  const insertados = await Promise.all(
-    nuevas.map(o =>
-      models.Movimiento.create({
-        id_tipo_movimiento: 2,
-        id_servicio:        o.id_servicio,
-        concepto:           `Pago de orden ${o.id}`,
-        cantidad:           o.costo_total,
-        fecha_movimiento:   o.fecha_orden,
-        estado:             true,
-      })
-    )
-  );
-
-  return {
-    message: 'Órdenes insertadas como movimientos',
-    data: insertados
-  };
+  return { message: 'Salarios pagados e insertados como movimientos', salarios };
 }
 
-
-
+  async obtenerOrdenes({ desde, hasta }) {
+    const existentes = await models.Movimiento.findAll({
+      where: { id_tipo_movimiento: 2 },
+      attributes: ['concepto', 'cantidad', 'fecha_movimiento', 'id_servicio']
+    });
+    const claves = new Set(existentes.map(m =>
+      [`Pago de orden ${m.concepto.split(' ').pop()}`, Number(m.cantidad).toFixed(2), new Date(m.fecha_movimiento).toISOString().split('T')[0], m.id_servicio].join('_')
+    ));
+    let ordenes;
+    try {
+      const { data } = await axios.get('http://localhost:3000/administracion/GET/ordenes', { params: { desde, hasta } });
+      ordenes = Array.isArray(data.ordenes) ? data.ordenes : [];
+    } catch {
+      throw boom.badGateway('No se pudo obtener datos del microservicio de órdenes');
+    }
+    const nuevas = ordenes.filter(o => {
+      const clave = [`Pago de orden ${o.id}`, Number(o.costo_total).toFixed(2), new Date(o.fecha_orden).toISOString().split('T')[0], o.id_servicio].join('_');
+      return !claves.has(clave);
+    });
+    if (!nuevas.length) return { message: 'No hay nuevas órdenes para insertar', data: [] };
+    const insertados = await models.Movimiento.bulkCreate(nuevas.map(o => ({
+      id_tipo_movimiento: 2,
+      id_servicio: o.id_servicio,
+      concepto: `Pago de orden ${o.id}`,
+      cantidad: o.costo_total,
+      fecha_movimiento: o.fecha_orden,
+      estado: true,
+    })));
+    return { message: 'Órdenes insertadas como movimientos', data: insertados };
+  }
 }
 
 module.exports = MovimientosService;

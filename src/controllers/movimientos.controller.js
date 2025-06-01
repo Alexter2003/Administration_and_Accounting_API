@@ -24,8 +24,8 @@ async findAll(req, res, next) {
 
   async findDiarios(req, res, next) {
     try {
-      const { fecha, id_servicio } = req.query;
-      const resultado = await service.findDiarios({ fecha, id_servicio });
+      const { fecha_dia, id_servicio } = req.query;
+      const resultado = await service.findDiarios({ fecha_dia, id_servicio });
       res.status(200).json(resultado);
     } catch (error) {
       next(error);
@@ -34,8 +34,8 @@ async findAll(req, res, next) {
 
   async findMensuales(req, res, next) {
     try {
-      const { mes, año, id_servicio } = req.query;
-      const resultado = await service.findMensuales({ mes, año, id_servicio });
+      const { fecha_mes, año, id_servicio } = req.query;
+      const resultado = await service.findMensuales({ fecha_mes, año, id_servicio });
       res.status(200).json(resultado);
     } catch (error) {
       next(error);
@@ -44,8 +44,8 @@ async findAll(req, res, next) {
 
   async findTrimestrales(req, res, next) {
     try {
-      const { trimestre, año, id_servicio } = req.query;
-      const resultado = await service.findTrimestrales({ trimestre, año, id_servicio });
+      const { numero_trimestre, año, id_servicio } = req.query;
+      const resultado = await service.findTrimestrales({ numero_trimestre, año, id_servicio });
       res.status(200).json(resultado);
     } catch (error) {
       next(error);
@@ -54,8 +54,8 @@ async findAll(req, res, next) {
 
   async findSemestrales(req, res, next) {
     try {
-      const { semestre, año, id_servicio } = req.query;
-      const resultado = await service.findSemestrales({ semestre, año, id_servicio });
+      const { numero_semestre, año, id_servicio } = req.query;
+      const resultado = await service.findSemestrales({ numero_semestre, año, id_servicio });
       res.status(200).json(resultado);
     } catch (error) {
       next(error);
@@ -81,7 +81,7 @@ async findAll(req, res, next) {
     }
   }
 
-  
+
 }
 
 module.exports = MovimientosController;

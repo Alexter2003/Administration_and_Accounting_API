@@ -11,7 +11,7 @@ const nombre_empleado = Joi.string().max(45).allow(null);
 
 const id_servicio = Joi.alternatives().try(
   Joi.number().integer(),
-  Joi.string().pattern(/^\d+$/).custom((value) => parseInt(value)) 
+  Joi.string().pattern(/^\d+$/).custom((value) => parseInt(value))
 ).optional();
 
 
@@ -21,24 +21,24 @@ const getMovimientoSchema = Joi.object({
 });
 
 const getDiariosSchema = Joi.object({
-  fecha: fecha.required(),
+  fecha_dia: fecha.required(),
   id_servicio
 });
 
 const getMensualesSchema = Joi.object({
-  mes: Joi.number().integer().min(1).max(12).required(),
+  fecha_mes: Joi.number().integer().min(1).max(12).required(),
   año: Joi.number().integer().min(2000).max(2100).required(),
   id_servicio
 });
 
 const getTrimestralesSchema = Joi.object({
-  trimestre: Joi.number().integer().min(1).max(4).required(),
+  numero_trimestre: Joi.number().integer().min(1).max(4).required(),
   año: Joi.number().integer().min(2000).max(2100).required(),
   id_servicio
 });
 
 const getSemestralesSchema = Joi.object({
-  semestre: Joi.number().integer().min(1).max(2).required(),
+  numero_semestre: Joi.number().integer().min(1).max(2).required(),
   año: Joi.number().integer().min(2000).max(2100).required(),
   id_servicio
 });
@@ -91,7 +91,7 @@ module.exports = {
   getMovimientosQuerySchema,
   createMovimientoSchema,
   getOrdenesSchema,
-  
+
 
 };
 

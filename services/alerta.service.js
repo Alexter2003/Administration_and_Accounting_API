@@ -7,7 +7,9 @@ class AlertaService {
   async create(data) {
     try {
       await models.Alerta.create(data);
-      return 'Alerta agregada con exito';
+      return {
+        message: 'Alerta agregada correctamente',
+      };
     } catch (error) {
       throw boom.badRequest(error);
     }
@@ -68,7 +70,9 @@ class AlertaService {
         throw boom.notFound('Alerta no encontrada');
       }
       await alerta.update({ estado: false });
-      return 'Alerta desactivada con exito';
+      return {
+        message: 'Alerta desactivada correctamente',
+      };
     } catch (error) {
       throw boom.badRequest(error);
     }

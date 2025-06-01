@@ -23,8 +23,8 @@ class AlertaController {
 
   async delete_alerta(req, res, next) {
     try {
-      await service.delete(req.params.id);
-      res.status(200).json({ message: 'Alerta eliminada correctamente' });
+      const alerta = await service.delete(req.params.id);
+      res.status(200).json(alerta);
     } catch (error) {
       next(error);
     }

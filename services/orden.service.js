@@ -6,16 +6,17 @@ class OrdenService {
   constructor() {
     // Configuración de endpoints de reabastecimiento por servicio
     this.reabastecimientoEndpoints = {
-      4: process.env.RESTOCK_SERVICE_1_URL || 'http://localhost:3002/general-deposit/update/supply',
+      4: process.env.RESTOCK_SERVICE_1_URL || 'http://64.23.169.22:3002/generalDeposit/update/supply',
       5: process.env.RESTOCK_SERVICE_2_URL || 'http://servicio2/api/restock',
-      6: process.env.RESTOCK_SERVICE_3_URL || 'http://localhost:4000/tallerrepuestos/productos/abastecer',
-      7: process.env.RESTOCK_SERVICE_4_URL || 'http://localhost:8000/pintura/POST/inventarios',
+      6: process.env.RESTOCK_SERVICE_3_URL || 'http://64.23.169.22:4000/tallerrepuestos/productos/abastecer',
+      7: process.env.RESTOCK_SERVICE_4_URL || 'http://64.23.169.22:8000/pintura/POST/inventarios',
     };
   }
 
   async find(){
     try {
       const ordenes = await models.Orden.findAll({
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
         order: [['id', 'ASC']],
 
       });
@@ -38,7 +39,7 @@ class OrdenService {
     try {
       const orden = await models.Orden.findByPk(id, {
         attributes: {
-          exclude: ['id_estado_orden', 'id_servicio', 'id_proveedor'],
+          exclude: ['id_estado_orden', 'id_servicio', 'id_proveedor', 'createdAt', 'updatedAt'],
         },
         include: [
           {
@@ -49,19 +50,22 @@ class OrdenService {
             model: models.Servicio,
             as: 'servicio',
             attributes: {
-              exclude: ['descripcion', 'estado'],
+              exclude: ['descripcion', 'estado', 'createdAt', 'updatedAt'],
             },
           },
           {
             model: models.Proveedor,
             as: 'proveedor',
             attributes: {
-              exclude: ['descripcion', 'estado'],
+              exclude: ['descripcion', 'estado', 'createdAt', 'updatedAt'],
             },
           },
           {
             model: models.OrdenDetalle,
             as: 'orden_detalles',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt'],
+            },
           },
         ],
       });
@@ -118,7 +122,9 @@ class OrdenService {
       // Si todo sale bien hacer commit de la transacción
       await transaction.commit();
 
-      return 'Orden creada correctamente';
+      return {
+        message: 'Orden creada correctamente'
+      };
     } catch (error) {
       // Para caso de error se hace un rollback de la transacción
       await transaction.rollback();
@@ -209,13 +215,17 @@ class OrdenService {
         }));
 
         await transaction.commit();
-        return 'Estado de orden actualizado correctamente y detalles actualizados';
+        return {
+          message: 'Estado de orden actualizado correctamente y detalles actualizados',
+        };
       }
 
       await transaction.commit();
 
       // Respuesta normal para otros cambios de estado
-      return 'Estado de orden actualizado correctamente';
+      return {
+        message: 'Estado de orden actualizado correctamente',
+      };
 
     } catch (error) {
       await transaction.rollback();
@@ -271,7 +281,9 @@ class OrdenService {
 
       await transaction.commit();
 
-      return 'Estado del detalle actualizado correctamente';
+      return {
+        message: 'Estado del detalle actualizado correctamente',
+      };
     } catch (error) {
       await transaction.rollback();
 

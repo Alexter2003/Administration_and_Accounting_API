@@ -7,7 +7,9 @@ class RolesService {
   async create (data) {
     try {
       await models.Rol.create(data);
-      return 'Rol creado correctamente';
+      return {
+        message: 'Rol creado correctamente',
+      };
     } catch (error) {
       throw boom.badRequest(error);
     }
@@ -81,7 +83,9 @@ class RolesService {
       }
 
       await rol.update(data);
-      return 'Rol actualizado correctamente';
+      return {
+        message: 'Rol actualizado correctamente',
+      };
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;
@@ -105,7 +109,9 @@ class RolesService {
         throw boom.conflict('Rol desactivado');
       }
       await rol.update({ estado: false });
-      return 'Rol eliminado correctamente';
+      return {
+        message: 'Rol eliminado correctamente',
+      };
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;

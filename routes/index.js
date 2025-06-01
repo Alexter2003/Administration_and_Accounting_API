@@ -24,12 +24,12 @@ function routerApi(app) {
   router.use(empleadoRouter);
   router.use(autenticacionRouter);
   router.use(asistenciasRouter);
+  router.use(estadosDetalleRouter);
+  router.use(estadosOrdenRouter);
   router.use(orderRouter);
   router.use(jornadaRouter);
   router.use(rolesrouter);
   router.use(areasRouter);
-  router.use(estadosDetalleRouter);
-  router.use(estadosOrdenRouter);
   router.use(serviciosRouter);
 
   router.use(movimientosRouter);

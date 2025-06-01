@@ -21,7 +21,7 @@ class TipoMovimientoService {
   });
   if (!tipo) throw boom.notFound('Tipo de movimiento no encontrado');
   return {
-    message: 'Tipo de movimiento encontrado',
+    message: 'Tipo de movimiento encontrado correctamente',
     tipo_movimiento: tipo,
   };
 }
