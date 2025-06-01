@@ -1,5 +1,5 @@
 const boom = require('@hapi/boom');
-const { models } = require('./../config/sequelize');
+const { sequelize, models } = require('./../config/sequelize');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
@@ -8,17 +8,19 @@ function generarPasswordAleatoria(length = 10) {
 }
 
 async function validarCamposUnicos(data, excludeId = null) {
+  const errores = [];
+
   if (data.dpi) {
     const existingDpi = await models.Empleado.findOne({ where: { dpi: data.dpi } });
     if (existingDpi && existingDpi.id !== excludeId) {
-      throw boom.conflict('El DPI ya está registrado');
+      errores.push('El DPI ya está registrado');
     }
   }
 
   if (data.telefono) {
     const existingTelefono = await models.Empleado.findOne({ where: { telefono: data.telefono } });
     if (existingTelefono && existingTelefono.id !== excludeId) {
-      throw boom.conflict('El teléfono ya está registrado');
+      errores.push('El teléfono ya está registrado');
     }
   }
 
@@ -26,8 +28,12 @@ async function validarCamposUnicos(data, excludeId = null) {
     const normalizedEmail = data.email.trim().toLowerCase();
     const existingEmail = await models.Empleado.findOne({ where: { email: normalizedEmail } });
     if (existingEmail && existingEmail.id !== excludeId) {
-      throw boom.conflict('El correo electrónico ya está registrado');
+      errores.push('El correo electrónico ya está registrado');
     }
+  }
+
+  if (errores.length > 0) {
+    throw boom.conflict(errores.join('. '));
   }
 }
 
@@ -35,54 +41,53 @@ class EmpleadosService {
   constructor() {}
 
   async create(data) {
-    try {
-      // Validar campos únicos antes de crear el empleado
-      await validarCamposUnicos(data);
+  const t = await sequelize.transaction();
+  try {
+    // Desestructurar los datos
+    const { empleado, asignacion } = data;
 
-      // Generar usuario y contraseña
-      const firstName = data.nombres.split(' ')[0].toLowerCase();
-      const lastName = data.apellidos.split(' ')[0].toLowerCase();
-      const dpiSegment = `${data.dpi[0]}${data.dpi[1]}${data.dpi[7]}${data.dpi[8]}`;
-      const usuario = `${firstName}${lastName}.${dpiSegment}`;
-      const password = generarPasswordAleatoria();
-      const hashedPassword = await bcrypt.hash(password, 10);
+    // Validar campos únicos antes de crear el empleado
+    await validarCamposUnicos(empleado);
 
-      const newEmpleado = await models.Empleado.create({
-        ...data,
+    // Generar usuario y contraseña
+    const firstName = empleado.nombres.split(' ')[0].toLowerCase();
+    const lastName = empleado.apellidos.split(' ')[0].toLowerCase();
+    const dpiSegment = `${empleado.dpi[0]}${empleado.dpi[1]}${empleado.dpi[7]}${empleado.dpi[8]}`;
+    const usuario = `${firstName}${lastName}.${dpiSegment}`;
+    const password = generarPasswordAleatoria();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newEmpleado = await models.Empleado.create({
+      ...empleado,
+      usuario,
+      password: hashedPassword,
+    }, { transaction: t });
+
+    // Crear la asignación
+    await models.EmpleadoAsignacion.create({
+      id_empleado: newEmpleado.id,
+      id_rol: asignacion.id_rol,
+      id_area: asignacion.id_area,
+      horas_semanales: asignacion.horas_semanales,
+    }, { transaction: t });
+
+    await t.commit();
+
+    // Excluir datos sensibles de la respuesta
+    const empleadoData = newEmpleado.toJSON();
+    delete empleadoData.password;
+    delete empleadoData.createdAt;
+    delete empleadoData.updatedAt;
+
+    return {
+      message: 'Empleado creado correctamente',
+      autenticacion: {
         usuario,
-        password: hashedPassword,
-      });
-
-      // Crear la asignación
-      const asignacion = await models.EmpleadoAsignacion.create({
-        id_empleado: newEmpleado.id,
-        id_rol: data.id_rol,
-        id_area: data.id_area,
-        horas_semanales: data.horas_semanales,
-      });
-
-      const asignacionCompleta = await models.EmpleadoAsignacion.findOne({
-        where: { id: asignacion.id },
-        include: [
-          { model: models.Rol, as: 'rol' },
-          { model: models.Areas, as: 'area' },
-        ],
-      });
-
-      // Excluir datos sensibles de la respuesta
-      const empleadoData = newEmpleado.toJSON();
-      delete empleadoData.password;
-      delete empleadoData.createdAt;
-      delete empleadoData.updatedAt;
-
-      return {
-        message: 'Empleado creado correctamente',
-        autenticacion: {
-          usuario,
-          contraseniaTemporal: password,
-        }
-      };
+        contraseniaTemporal: password,
+      }
+    };
     } catch (error) {
+      await t.rollback();
       throw boom.badRequest(error.message);
     }
   }
@@ -172,6 +177,7 @@ class EmpleadosService {
       delete empleadoData.empleado_asignacion;
 
       return {
+        message: 'Empleado encontrado correctamente',
         empleado: empleadoData,
         asignacion: asignacion.length > 0
           ? {
@@ -192,6 +198,8 @@ class EmpleadosService {
   }
 
   async update(id, data) {
+    const { empleado: empleadoData = {}, asignacion: asignacionData = {} } = data;
+
     const empleado = await models.Empleado.findByPk(id, {
       include: [
         {
@@ -205,55 +213,31 @@ class EmpleadosService {
       ],
     });
 
-    if (!empleado) {
-      throw boom.notFound('Empleado no encontrado');
+    if (!empleado) throw boom.notFound('Empleado no encontrado');
+
+    await validarCamposUnicos(empleadoData, id);
+
+    if (Object.keys(empleadoData).length > 0) {
+      await empleado.update(empleadoData);
     }
 
-    await validarCamposUnicos(data, id);
-
-    // Actualizar los datos del empleado
-    const updatedEmpleado = await empleado.update(data);
-
-    // Actualizar o crear la asignacion si se proporciona
-    if (data.id_rol && data.id_area) {
+    if (Object.keys(asignacionData).length > 0) {
       const asignacion = await models.EmpleadoAsignacion.findOne({
-        where: { id_empleado: id, estado: true },
+        where: { id_empleado: id },
       });
 
       if (asignacion) {
-        // Actualizar la asignacion existente
-        await asignacion.update({
-          id_rol: data.id_rol,
-          id_area: data.id_area,
-          horas_semanales: data.horas_semanales || asignacion.horas_semanales,
-        });
+        await asignacion.update(asignacionData);
       } else {
-        // Crear una nueva asignacion
         await models.EmpleadoAsignacion.create({
           id_empleado: id,
-          id_rol: data.id_rol,
-          id_area: data.id_area,
-          horas_semanales: data.horas_semanales,
+          ...asignacionData,
           estado: true,
         });
       }
     }
 
-    // Excluir datos sensibles de la respuesta
-    const empleadoData = updatedEmpleado.toJSON();
-    delete empleadoData.password;
-    delete empleadoData.createdAt;
-    delete empleadoData.updatedAt;
-
-    const asignacion = await models.EmpleadoAsignacion.findAll({
-      where: { id_empleado: id, estado: true },
-      include: [
-        { model: models.Rol, as: 'rol' },
-        { model: models.Areas, as: 'area' },
-      ],
-    });
-
-    return 'Empleado actualizado correctamente';
+    return { message: 'Empleado actualizado correctamente' };
   }
 
   async findEmpleadosAnteriores() {
@@ -316,7 +300,9 @@ class EmpleadosService {
         { estado: false },
         { where: { id_empleado: id, estado: true } }
       );
-      return 'Empleado eliminado con éxito';
+      return {
+        message: 'Empleado eliminado correctamente',
+      }
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;

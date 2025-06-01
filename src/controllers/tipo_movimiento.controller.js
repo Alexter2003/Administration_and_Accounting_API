@@ -32,7 +32,7 @@ class TipoMovimientoController {
 
   async findOne(req, res, next) {
     try {
-      const { id } = req.query; 
+      const { id } = req.params;
       const result = await service.findOne(id);
       res.json(result);
     } catch (error) {

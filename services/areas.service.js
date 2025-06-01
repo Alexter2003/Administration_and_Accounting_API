@@ -7,7 +7,9 @@ class AreasService {
   async create (data) {
     try {
       await models.Areas.create(data);
-      return 'Area agregada con exito';
+      return {
+        message: 'Area agregada correctamente',
+      };
     } catch (error) {
       throw boom.badRequest(error.message);
     }
@@ -73,8 +75,7 @@ class AreasService {
       }
       const updatedArea = await area.update(data);
       return {
-        message: 'Area actualizada correctamente',
-        data: updatedArea
+        message: 'Area actualizada correctamente.',
       };
     } catch (error) {
       if (boom.isBoom(error)) {
@@ -91,7 +92,9 @@ class AreasService {
         throw boom.notFound('Area no encontrada');
       }
       await area.update({ estado: false });
-      return 'Area eliminada correctamente';
+      return {
+        message: 'Area eliminada correctamente',
+      };
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;

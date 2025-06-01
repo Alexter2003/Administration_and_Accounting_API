@@ -5,7 +5,7 @@ const estadosOrdenController = new EstadoOrdenController();
 const router = express.Router();
 
 //Obtener todos los estados orden
-router.get('/GET/estados_ordenes', (req, res, next) => {
+router.get('/GET/ordenes/estados_ordenes', (req, res, next) => {
   estadosOrdenController.find(req, res, next);
 });
 

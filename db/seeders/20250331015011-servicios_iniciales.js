@@ -32,12 +32,17 @@ module.exports = {
       },
       {
         nombre: 'repuestos',
-        descripcion: 'Servicio de tienda de repuestos en gasolinera',
+        descripcion: 'Servicio de mantenimiento de vehiculos y repuestos en gasolinera',
         estado: true,
       },
       {
         nombre: 'pintura',
         descripcion: 'Servicio de taller de pintura en la gasolinera',
+        estado: true,
+      },
+      {
+        nombre: 'frontend',
+        descripcion: 'Servicio de interfaz de usuario para la gasolinera',
         estado: true,
       },
     ];

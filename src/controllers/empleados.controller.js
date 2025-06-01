@@ -31,8 +31,8 @@ class EmpleadosController {
 
   async update(req, res, next) {
     try {
-      const empleado = await service.update(req.params.id, req.body);
-      res.status(200).json(empleado);
+      const result = await service.update(req.params.id, req.body);
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }

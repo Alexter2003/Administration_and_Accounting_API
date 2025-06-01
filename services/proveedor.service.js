@@ -7,7 +7,9 @@ class ProveedorService {
   async create(data) {
     try {
       await models.Proveedor.create(data);
-      return 'Proveedor creado correctamente';
+      return {
+        message: 'Proveedor registrado correctamente',
+      };
     } catch (error) {
       throw boom.badRequest(error);
     }
@@ -50,7 +52,7 @@ class ProveedorService {
         throw boom.conflict('Proveedor desactivado');
       }
       return {
-        message: 'Proveedor activo encontrado correctamente',
+        message: 'Proveedor encontrado correctamente',
         proveedor: proveedor,
       };
     } catch (error) {
@@ -68,7 +70,9 @@ class ProveedorService {
         where: { id },
         returning: true
       });
-      return 'Proveedor actualizado correctamente';
+      return {
+        message: 'Proveedor actualizado correctamente',
+      };
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;
@@ -87,7 +91,9 @@ class ProveedorService {
         throw boom.conflict('El proveedor ya esta desactivado');
       }
       await proveedor.update({ estado: false });
-      return 'Proveedor desactivado correctamente';
+      return {
+        message: 'Proveedor eliminado correctamente',
+      };
     } catch (error) {
       if (boom.isBoom(error)) {
         throw error;

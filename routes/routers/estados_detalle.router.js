@@ -6,7 +6,7 @@ const router = express.Router();
 
 
 //Obtener todos los estados detalle
-router.get('/GET/estados_ordenes_detalles', (req, res, next) => {
+router.get('/GET/ordenes/estados_ordenes_detalles', (req, res, next) => {
   estadosDetalleController.find(req, res, next);
 });
 

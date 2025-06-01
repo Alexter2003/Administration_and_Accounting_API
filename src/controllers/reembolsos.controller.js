@@ -13,7 +13,6 @@ class ReembolsosController {
       const result = await service.create(reembolso);
       res.status(201).json({
         message: 'Reembolso registrado correctamente',
-        data: result
       });
     } catch (error) {
       next(error);
