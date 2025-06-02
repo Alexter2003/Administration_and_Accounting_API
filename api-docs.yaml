@@ -11,6 +11,708 @@ servers:
   - url: http://localhost:3000/administracion
     description: Servidor de desarrollo
 paths:
+  /GET/areas:
+    get:
+      summary: Obtener todas las áreas
+      description: Obtiene una lista de todas las áreas activas en el sistema
+      responses:
+        '200':
+          description: Lista de áreas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Areas activas encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                          minLength: 5
+                          maxLength: 45
+                        descripcion:
+                          type: string
+                          minLength: 5
+                          maxLength: 200
+                        estado:
+                          type: boolean
+        '404':
+          description: No se encontraron áreas activas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "No hay areas activas"
+
+  /GET/areas/{id}:
+    get:
+      summary: Obtener área por ID
+      description: Obtiene un área específica por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Área encontrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Area encontrada correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      nombre:
+                        type: string
+                      descripcion:
+                        type: string
+                      estado:
+                        type: boolean
+        '404':
+          description: Área no encontrada
+
+  /POST/areas:
+    post:
+      summary: Crear área
+      description: Crea una nueva área en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - descripcion
+                - id_servicio
+              properties:
+                nombre:
+                  type: string
+                  minLength: 5
+                  maxLength: 45
+                descripcion:
+                  type: string
+                  minLength: 5
+                  maxLength: 200
+                id_servicio:
+                  type: integer
+      responses:
+        '201':
+          description: Área creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Area creada correctamente"
+                  data:
+                    type: object
+
+  /PUT/areas/{id}:
+    put:
+      summary: Actualizar área
+      description: Actualiza un área existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  minLength: 5
+                  maxLength: 45
+                descripcion:
+                  type: string
+                  minLength: 5
+                  maxLength: 200
+      responses:
+        '200':
+          description: Área actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Area actualizada correctamente"
+                  data:
+                    type: object
+
+  /PATCH/areas/{id}:
+    patch:
+      summary: Eliminar área
+      description: Marca un área como eliminada (inactiva)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Área eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Area eliminada correctamente"
+
+  /GET/empleados:
+    get:
+      summary: Obtener todos los empleados
+      description: Obtiene una lista de todos los empleados activos en el sistema
+      responses:
+        '200':
+          description: Lista de empleados obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleados activos encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        dpi:
+                          type: string
+                          pattern: "^[0-9]{13}$"
+                        nombres:
+                          type: string
+                          minLength: 3
+                          maxLength: 100
+                        apellidos:
+                          type: string
+                          minLength: 3
+                          maxLength: 100
+                        telefono:
+                          type: string
+                          pattern: "^[0-9]{8}$"
+                        direccion:
+                          type: string
+                          minLength: 3
+                          maxLength: 255
+                        nit:
+                          type: string
+                        genero:
+                          type: boolean
+                        id_jornada:
+                          type: integer
+                        email:
+                          type: string
+                          format: email
+                          minLength: 3
+                          maxLength: 100
+        '404':
+          description: No se encontraron empleados activos
+
+  /GET/empleados/bajas:
+    get:
+      summary: Obtener empleados anteriores
+      description: Obtiene una lista de empleados que trabajaron previamente en la gasolinera
+      responses:
+        '200':
+          description: Lista de empleados anteriores obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleados anteriores encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        dpi:
+                          type: string
+                        nombres:
+                          type: string
+                        apellidos:
+                          type: string
+                        telefono:
+                          type: string
+                        direccion:
+                          type: string
+                        nit:
+                          type: string
+                        genero:
+                          type: boolean
+                        id_jornada:
+                          type: integer
+                        email:
+                          type: string
+
+  /GET/empleados/{id}:
+    get:
+      summary: Obtener empleado por ID
+      description: Obtiene un empleado específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Empleado encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleado encontrado correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      dpi:
+                        type: string
+                      nombres:
+                        type: string
+                      apellidos:
+                        type: string
+                      telefono:
+                        type: string
+                      direccion:
+                        type: string
+                      nit:
+                        type: string
+                      genero:
+                        type: boolean
+                      id_jornada:
+                        type: integer
+                      email:
+                        type: string
+        '404':
+          description: Empleado no encontrado
+
+  /POST/empleados:
+    post:
+      summary: Crear empleado
+      description: Crea un nuevo empleado en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - empleado
+                - asignacion
+              properties:
+                empleado:
+                  type: object
+                  required:
+                    - dpi
+                    - nombres
+                    - apellidos
+                    - telefono
+                    - direccion
+                    - nit
+                    - genero
+                    - id_jornada
+                    - email
+                  properties:
+                    dpi:
+                      type: string
+                      pattern: "^[0-9]{13}$"
+                    nombres:
+                      type: string
+                      minLength: 3
+                      maxLength: 100
+                    apellidos:
+                      type: string
+                      minLength: 3
+                      maxLength: 100
+                    telefono:
+                      type: string
+                      pattern: "^[0-9]{8}$"
+                    direccion:
+                      type: string
+                      minLength: 3
+                      maxLength: 255
+                    nit:
+                      type: string
+                    genero:
+                      type: boolean
+                    id_jornada:
+                      type: integer
+                    email:
+                      type: string
+                      format: email
+                      minLength: 3
+                      maxLength: 100
+                asignacion:
+                  type: object
+                  required:
+                    - id_rol
+                    - id_area
+                    - horas_semanales
+                  properties:
+                    id_rol:
+                      type: integer
+                    id_area:
+                      type: integer
+                    horas_semanales:
+                      type: integer
+      responses:
+        '201':
+          description: Empleado creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleado creado correctamente"
+                  data:
+                    type: object
+
+  /PUT/empleados/{id}:
+    put:
+      summary: Actualizar empleado
+      description: Actualiza un empleado existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dpi:
+                  type: string
+                  pattern: "^[0-9]{13}$"
+                nombres:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                apellidos:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                telefono:
+                  type: string
+                  pattern: "^[0-9]{8}$"
+                direccion:
+                  type: string
+                  minLength: 3
+                  maxLength: 255
+                nit:
+                  type: string
+                genero:
+                  type: boolean
+                id_jornada:
+                  type: integer
+                email:
+                  type: string
+                  format: email
+                  minLength: 3
+                  maxLength: 100
+      responses:
+        '200':
+          description: Empleado actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleado actualizado correctamente"
+                  data:
+                    type: object
+
+  /PATCH/empleados/{id}:
+    patch:
+      summary: Eliminar empleado
+      description: Marca un empleado como eliminado (inactivo)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Empleado eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empleado eliminado correctamente"
+
+  /GET/ordenes:
+    get:
+      summary: Obtener todas las órdenes
+      description: Obtiene una lista de todas las órdenes activas en el sistema
+      responses:
+        '200':
+          description: Lista de órdenes obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Órdenes activas encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        id_servicio:
+                          type: integer
+                        id_estado_orden:
+                          type: integer
+                          minimum: 1
+                          maximum: 4
+                        id_proveedor:
+                          type: integer
+                        fecha_orden:
+                          type: string
+                          format: date
+        '404':
+          description: No se encontraron órdenes activas
+
+  /GET/ordenes/{id}:
+    get:
+      summary: Obtener orden por ID
+      description: Obtiene una orden específica por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orden encontrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Orden encontrada correctamente"
+                  data:
+                    type: object
+        '404':
+          description: Orden no encontrada
+
+  /POST/ordenes:
+    post:
+      summary: Crear orden
+      description: Crea una nueva orden en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_servicio
+                - id_proveedor
+                - fecha_orden
+                - detalles
+              properties:
+                id_servicio:
+                  type: integer
+                id_proveedor:
+                  type: integer
+                fecha_orden:
+                  type: string
+                  format: date
+                  description: "Debe ser una fecha futura"
+                detalles:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id_producto
+                      - cantidad
+                      - precio_unitario
+                    properties:
+                      id_producto:
+                        type: integer
+                      cantidad:
+                        type: integer
+                        minimum: 1
+                      precio_unitario:
+                        type: integer
+      responses:
+        '201':
+          description: Orden creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Orden creada correctamente"
+                  data:
+                    type: object
+
+  /PUT/ordenes/modificar_estado/{id}:
+    put:
+      summary: Actualizar estado de orden
+      description: Actualiza el estado de una orden existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - estado
+              properties:
+                estado:
+                  type: integer
+                  minimum: 1
+                  maximum: 4
+      responses:
+        '200':
+          description: Estado de orden actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estado de orden actualizado correctamente"
+                  data:
+                    type: object
+
+  /PUT/ordenes/detalle/{id}:
+    put:
+      summary: Actualizar estado de detalle de orden
+      description: Actualiza el estado de un detalle específico de una orden
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - estado
+              properties:
+                estado:
+                  type: integer
+                  enum: [1, 2, 3]
+                cantidad:
+                  type: integer
+                  minimum: 1
+                  description: "Requerido solo cuando estado es 2"
+      responses:
+        '200':
+          description: Estado de detalle actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estado de detalle actualizado correctamente"
+                  data:
+                    type: object
+
+  /POST/ordenes/reabastecer/{id}:
+    post:
+      summary: Reabastecer orden
+      description: Realiza el reabastecimiento de una orden específica
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orden reabastecida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Orden reabastecida correctamente"
+                  data:
+                    type: object
+
   /GET/alertas:
     get:
       summary: Obtener todas las alertas
@@ -219,13 +921,13 @@ paths:
                     type: string
                     example: "Alerta eliminada correctamente"
 
-  /GET/proveedores:
+  /GET/movimientos:
     get:
-      summary: Obtener todos los proveedores
-      description: Obtiene una lista de todos los proveedores activos
+      summary: Obtener todos los movimientos
+      description: Obtiene una lista de todos los movimientos
       responses:
         '200':
-          description: Lista de proveedores obtenida exitosamente
+          description: Lista de movimientos obtenida exitosamente
           content:
             application/json:
               schema:
@@ -233,121 +935,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Proveedores activos encontrados correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-        '404':
-          description: No se encontraron proveedores activos
-
-  /GET/proveedores/{id}:
-    get:
-      summary: Obtener proveedor por ID
-      description: Obtiene un proveedor específico por su ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Proveedor encontrado exitosamente
-        '404':
-          description: Proveedor no encontrado
-
-  /POST/proveedores:
-    post:
-      summary: Crear proveedor
-      description: Crea un nuevo proveedor
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        '201':
-          description: Proveedor creado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Proveedor creado correctamente"
-                  data:
-                    type: object
-
-  /PUT/proveedores/{id}:
-    put:
-      summary: Actualizar proveedor
-      description: Actualiza un proveedor existente
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        '200':
-          description: Proveedor actualizado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Proveedor actualizado correctamente"
-                  data:
-                    type: object
-
-  /PATCH/proveedores/{id}:
-    patch:
-      summary: Eliminar proveedor
-      description: Marca un proveedor como eliminado (inactivo)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Proveedor eliminado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Proveedor desactivado correctamente"
-
-  /GET/areas:
-    get:
-      summary: Obtener todas las áreas
-      description: Obtiene una lista de todas las áreas activas en el sistema
-      responses:
-        '200':
-          description: Lista de áreas obtenida exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Areas activas encontradas correctamente"
+                    example: "Movimientos encontrados correctamente"
                   data:
                     type: array
                     items:
@@ -355,31 +943,18 @@ paths:
                       properties:
                         id:
                           type: integer
-                        nombre:
+                        concepto:
                           type: string
-                          minLength: 5
-                          maxLength: 45
-                        descripcion:
+                        cantidad:
+                          type: number
+                        fecha_movimiento:
                           type: string
-                          minLength: 5
-                          maxLength: 200
-                        estado:
-                          type: boolean
-        '404':
-          description: No se encontraron áreas activas
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "No hay areas activas"
+                          format: date-time
 
-  /GET/areas/{id}:
+  /GET/movimientos/{id}:
     get:
-      summary: Obtener área por ID
-      description: Obtiene un área específica por su ID
+      summary: Obtener movimiento por ID
+      description: Obtiene un movimiento específico por su ID
       parameters:
         - name: id
           in: path
@@ -388,7 +963,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Área encontrada exitosamente
+          description: Movimiento encontrado exitosamente
           content:
             application/json:
               schema:
@@ -396,125 +971,39 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Area encontrada correctamente"
+                    example: "Movimiento encontrado correctamente"
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                      nombre:
+                      concepto:
                         type: string
-                      descripcion:
+                      cantidad:
+                        type: number
+                      fecha_movimiento:
                         type: string
-                      estado:
-                        type: boolean
-        '404':
-          description: Área no encontrada
+                        format: date-time
 
-  /POST/areas:
-    post:
-      summary: Crear área
-      description: Crea una nueva área en el sistema
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - nombre
-                - descripcion
-              properties:
-                nombre:
-                  type: string
-                  minLength: 5
-                  maxLength: 45
-                descripcion:
-                  type: string
-                  minLength: 5
-                  maxLength: 200
-      responses:
-        '201':
-          description: Área creada exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Area creada correctamente"
-                  data:
-                    type: object
-
-  /PUT/areas/{id}:
-    put:
-      summary: Actualizar área
-      description: Actualiza un área existente
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                nombre:
-                  type: string
-                  minLength: 5
-                  maxLength: 45
-                descripcion:
-                  type: string
-                  minLength: 5
-                  maxLength: 200
-      responses:
-        '200':
-          description: Área actualizada exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Area actualizada correctamente"
-                  data:
-                    type: object
-
-  /PATCH/areas/{id}:
-    patch:
-      summary: Eliminar área
-      description: Marca un área como eliminada (inactiva)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Área eliminada exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Area eliminada correctamente"
-
-  /GET/jornadas:
+  /GET/movimientos/diarios:
     get:
-      summary: Obtener todas las jornadas
-      description: Obtiene una lista de todas las jornadas activas en el sistema
+      summary: Obtener movimientos diarios
+      description: Obtiene los movimientos de un día específico
+      parameters:
+        - name: fecha_dia
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
-          description: Lista de jornadas obtenida exitosamente
+          description: Movimientos diarios encontrados exitosamente
           content:
             application/json:
               schema:
@@ -522,35 +1011,38 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Jornadas activas encontradas correctamente"
                   data:
                     type: array
                     items:
                       type: object
-        '404':
-          description: No se encontraron jornadas activas
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "No hay jornadas activas"
 
-  /GET/jornadas/{id}:
+  /GET/movimientos/mensuales:
     get:
-      summary: Obtener jornada por ID
-      description: Obtiene una jornada específica por su ID
+      summary: Obtener movimientos mensuales
+      description: Obtiene los movimientos de un mes específico
       parameters:
-        - name: id
-          in: path
+        - name: fecha_mes
+          in: query
           required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: año
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: id_servicio
+          in: query
+          required: false
           schema:
             type: integer
       responses:
         '200':
-          description: Jornada encontrada exitosamente
+          description: Movimientos mensuales encontrados exitosamente
           content:
             application/json:
               schema:
@@ -558,19 +1050,38 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Jornada encontrada correctamente"
                   data:
-                    type: object
-        '404':
-          description: Jornada no encontrada
+                    type: array
+                    items:
+                      type: object
 
-  /GET/roles:
+  /GET/movimientos/trimestrales:
     get:
-      summary: Obtener todos los roles
-      description: Obtiene una lista de todos los roles activos en el sistema
+      summary: Obtener movimientos trimestrales
+      description: Obtiene los movimientos de un trimestre específico
+      parameters:
+        - name: numero_trimestre
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4
+        - name: año
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
-          description: Lista de roles obtenida exitosamente
+          description: Movimientos trimestrales encontrados exitosamente
           content:
             application/json:
               schema:
@@ -578,7 +1089,115 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Roles activos encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /GET/movimientos/semestrales:
+    get:
+      summary: Obtener movimientos semestrales
+      description: Obtiene los movimientos de un semestre específico
+      parameters:
+        - name: numero_semestre
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2
+        - name: año
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movimientos semestrales encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /GET/movimientos/anuales:
+    get:
+      summary: Obtener movimientos anuales
+      description: Obtiene los movimientos de un año específico
+      parameters:
+        - name: año
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: id_servicio
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movimientos anuales encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /POST/pagar-salarios:
+    post:
+      summary: Pagar salarios
+      description: Realiza el pago de salarios a los empleados
+      responses:
+        '200':
+          description: Salarios pagados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Salarios pagados correctamente"
+                  data:
+                    type: object
+
+  /GET/tipo_movimientos:
+    get:
+      summary: Obtener todos los tipos de movimiento
+      description: Obtiene una lista de todos los tipos de movimiento disponibles
+      responses:
+        '200':
+          description: Lista de tipos de movimiento obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Tipos de movimiento encontrados correctamente"
                   data:
                     type: array
                     items:
@@ -588,600 +1207,14 @@ paths:
                           type: integer
                         nombre:
                           type: string
-                        descripcion:
-                          type: string
-                        salario:
-                          type: integer
-                        id_rol_superior:
-                          type: integer
-                        estado:
-                          type: boolean
-        '404':
-          description: No se encontraron roles activos
-
-  /GET/roles/{id}:
-    get:
-      summary: Obtener rol por ID
-      description: Obtiene un rol específico por su ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Rol encontrado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Rol encontrado correctamente"
-                  data:
-                    type: object
-        '404':
-          description: Rol no encontrado
-
-  /POST/roles:
-    post:
-      summary: Crear rol
-      description: Crea un nuevo rol en el sistema
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - nombre
-                - descripcion
-                - salario
-              properties:
-                nombre:
-                  type: string
-                  minLength: 5
-                  maxLength: 45
-                descripcion:
-                  type: string
-                  minLength: 5
-                  maxLength: 200
-                salario:
-                  type: integer
-                  minimum: 0
-                  maximum: 1000000
-                id_rol_superior:
-                  type: integer
-                  minimum: 1
-                  maximum: 1000000
-      responses:
-        '201':
-          description: Rol creado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Rol creado correctamente"
-                  data:
-                    type: object
-
-  /PUT/roles/{id}:
-    put:
-      summary: Actualizar rol
-      description: Actualiza un rol existente
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                nombre:
-                  type: string
-                  minLength: 5
-                  maxLength: 45
-                descripcion:
-                  type: string
-                  minLength: 5
-                  maxLength: 200
-                salario:
-                  type: integer
-                  minimum: 0
-                  maximum: 1000000
-                id_rol_superior:
-                  type: integer
-                  minimum: 1
-                  maximum: 1000000
-      responses:
-        '200':
-          description: Rol actualizado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Rol actualizado correctamente"
-                  data:
-                    type: object
-
-  /PATCH/roles/{id}:
-    patch:
-      summary: Eliminar rol
-      description: Marca un rol como eliminado (inactivo)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Rol eliminado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Rol eliminado correctamente"
-
-  /GET/empleados:
-    get:
-      summary: Obtener todos los empleados
-      description: Obtiene una lista de todos los empleados activos en el sistema
-      responses:
-        '200':
-          description: Lista de empleados obtenida exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Empleados activos encontrados correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        dpi:
-                          type: string
-                          pattern: "^[0-9]{13}$"
-                        nombres:
-                          type: string
-                          minLength: 3
-                          maxLength: 100
-                        apellidos:
-                          type: string
-                          minLength: 3
-                          maxLength: 100
-                        telefono:
-                          type: string
-                          pattern: "^[0-9]{8}$"
-                        direccion:
-                          type: string
-                          minLength: 3
-                          maxLength: 255
-                        nit:
-                          type: string
-                        genero:
-                          type: boolean
-                        id_jornada:
-                          type: integer
-                        email:
-                          type: string
-                          format: email
-                          minLength: 3
-                          maxLength: 100
-        '404':
-          description: No se encontraron empleados activos
-
-  /GET/empleados/{id}:
-    get:
-      summary: Obtener empleado por ID
-      description: Obtiene un empleado específico por su ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Empleado encontrado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Empleado encontrado correctamente"
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                      dpi:
-                        type: string
-                      nombres:
-                        type: string
-                      apellidos:
-                        type: string
-                      telefono:
-                        type: string
-                      direccion:
-                        type: string
-                      nit:
-                        type: string
-                      genero:
-                        type: boolean
-                      id_jornada:
-                        type: integer
-                      email:
-                        type: string
-        '404':
-          description: Empleado no encontrado
-
-  /POST/empleados:
-    post:
-      summary: Crear empleado
-      description: Crea un nuevo empleado en el sistema
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - dpi
-                - nombres
-                - apellidos
-                - telefono
-                - direccion
-                - nit
-                - genero
-                - id_jornada
-                - email
-              properties:
-                dpi:
-                  type: string
-                  pattern: "^[0-9]{13}$"
-                nombres:
-                  type: string
-                  minLength: 3
-                  maxLength: 100
-                apellidos:
-                  type: string
-                  minLength: 3
-                  maxLength: 100
-                telefono:
-                  type: string
-                  pattern: "^[0-9]{8}$"
-                direccion:
-                  type: string
-                  minLength: 3
-                  maxLength: 255
-                nit:
-                  type: string
-                genero:
-                  type: boolean
-                id_jornada:
-                  type: integer
-                email:
-                  type: string
-                  format: email
-                  minLength: 3
-                  maxLength: 100
-      responses:
-        '201':
-          description: Empleado creado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Empleado creado correctamente"
-                  data:
-                    type: object
-
-  /PUT/empleados/{id}:
-    put:
-      summary: Actualizar empleado
-      description: Actualiza un empleado existente
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dpi:
-                  type: string
-                  pattern: "^[0-9]{13}$"
-                nombres:
-                  type: string
-                  minLength: 3
-                  maxLength: 100
-                apellidos:
-                  type: string
-                  minLength: 3
-                  maxLength: 100
-                telefono:
-                  type: string
-                  pattern: "^[0-9]{8}$"
-                direccion:
-                  type: string
-                  minLength: 3
-                  maxLength: 255
-                nit:
-                  type: string
-                genero:
-                  type: boolean
-                id_jornada:
-                  type: integer
-                email:
-                  type: string
-                  format: email
-                  minLength: 3
-                  maxLength: 100
-      responses:
-        '200':
-          description: Empleado actualizado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Empleado actualizado correctamente"
-                  data:
-                    type: object
-
-  /PATCH/empleados/{id}:
-    patch:
-      summary: Eliminar empleado
-      description: Marca un empleado como eliminado (inactivo)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Empleado eliminado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Empleado eliminado correctamente"
-
-  /GET/ordenes:
-    get:
-      summary: Obtener todas las órdenes
-      description: Obtiene una lista de todas las órdenes activas en el sistema
-      responses:
-        '200':
-          description: Lista de órdenes obtenida exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Órdenes activas encontradas correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        id_servicio:
-                          type: integer
-                        id_estado_orden:
-                          type: integer
-                          minimum: 1
-                          maximum: 4
-                        id_proveedor:
-                          type: integer
-                        fecha_orden:
-                          type: string
-                          format: date
-        '404':
-          description: No se encontraron órdenes activas
-
-  /GET/ordenes/{id}:
-    get:
-      summary: Obtener orden por ID
-      description: Obtiene una orden específica por su ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Orden encontrada exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Orden encontrada correctamente"
-                  data:
-                    type: object
-        '404':
-          description: Orden no encontrada
-
-  /PUT/ordenes/modificar_estado/{id}:
-    put:
-      summary: Actualizar estado de orden
-      description: Actualiza el estado de una orden existente
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - estado
-              properties:
-                estado:
-                  type: integer
-                  minimum: 1
-                  maximum: 4
-      responses:
-        '200':
-          description: Estado de orden actualizado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Estado de orden actualizado correctamente"
-                  data:
-                    type: object
-
-  /PUT/ordenes/detalle/{id}:
-    put:
-      summary: Actualizar estado de detalle de orden
-      description: Actualiza el estado de un detalle específico de una orden
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - estado
-              properties:
-                estado:
-                  type: integer
-                  enum: [1, 2, 3]
-                cantidad:
-                  type: integer
-                  minimum: 1
-                  description: "Requerido solo cuando estado es 2"
-      responses:
-        '200':
-          description: Estado de detalle actualizado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Estado de detalle actualizado correctamente"
-                  data:
-                    type: object
-
-  /POST/ordenes/reabastecer/{id}:
-    post:
-      summary: Reabastecer orden
-      description: Realiza el reabastecimiento de una orden específica
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Orden reabastecida exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Orden reabastecida correctamente"
-                  data:
-                    type: object
-
-  /GET/servicios:
-    get:
-      summary: Obtener todos los servicios
-      description: Obtiene una lista de todos los servicios activos en el sistema
-      responses:
-        '200':
-          description: Lista de servicios obtenida exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Servicios encontrados correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        nombre:
-                          type: string
-                          maxLength: 45
+                          maxLength: 50
                         descripcion:
                           type: string
                           maxLength: 150
                         estado:
                           type: boolean
-                          default: true
         '404':
-          description: No se encontraron servicios
+          description: No se encontraron tipos de movimiento
           content:
             application/json:
               schema:
@@ -1192,12 +1225,12 @@ paths:
                     example: 404
                   message:
                     type: string
-                    example: "No hay servicios disponibles"
+                    example: "No hay tipos de movimiento disponibles"
 
-  /GET/servicios/{id}:
+  /GET/tipo_movimientos/{id}:
     get:
-      summary: Obtener servicio por ID
-      description: Obtiene un servicio específico por su ID
+      summary: Obtener tipo de movimiento por ID
+      description: Obtiene un tipo de movimiento específico por su ID
       parameters:
         - name: id
           in: path
@@ -1206,7 +1239,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Servicio encontrado exitosamente
+          description: Tipo de movimiento encontrado exitosamente
           content:
             application/json:
               schema:
@@ -1214,41 +1247,69 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Servicio encontrado correctamente"
+                    example: "Tipo de movimiento encontrado correctamente"
                   data:
                     type: object
-                    properties:
-                      id:
-                        type: integer
-                      nombre:
-                        type: string
-                        maxLength: 45
-                      descripcion:
-                        type: string
-                        maxLength: 150
-                      estado:
-                        type: boolean
-        '404':
-          description: Servicio no encontrado
+
+  /POST/tipo_movimientos:
+    post:
+      summary: Crear tipo de movimiento
+      description: Crea un nuevo tipo de movimiento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+              properties:
+                nombre:
+                  type: string
+                  maxLength: 50
+                descripcion:
+                  type: string
+                  maxLength: 150
+                estado:
+                  type: boolean
+      responses:
+        '201':
+          description: Tipo de movimiento creado exitosamente
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  statusCode:
-                    type: integer
-                    example: 404
                   message:
                     type: string
-                    example: "Servicio no encontrado"
+                    example: "Tipo de movimiento creado correctamente"
+                  data:
+                    type: object
 
-  /GET/estados_ordenes_detalles:
-    get:
-      summary: Obtener todos los estados de detalle
-      description: Obtiene una lista de todos los estados posibles para los detalles de órdenes
+  /PATCH/tipo_movimientos/{id}:
+    patch:
+      summary: Actualizar tipo de movimiento
+      description: Actualiza un tipo de movimiento existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                descripcion:
+                  type: string
       responses:
         '200':
-          description: Lista de estados de detalle obtenida exitosamente
+          description: Tipo de movimiento actualizado exitosamente
           content:
             application/json:
               schema:
@@ -1256,41 +1317,23 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Estados encontrados correctamente"
+                    example: "Tipo de movimiento actualizado correctamente"
                   data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        nombre:
-                          type: string
-                          maxLength: 45
-                        descripcion:
-                          type: string
-                          maxLength: 255
-        '404':
-          description: No se encontraron estados de detalle
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  statusCode:
-                    type: integer
-                    example: 404
-                  message:
-                    type: string
-                    example: "No hay estados disponibles"
+                    type: object
 
-  /GET/estados_ordenes:
-    get:
-      summary: Obtener todos los estados de orden
-      description: Obtiene una lista de todos los estados posibles para las órdenes
+  /DELETE/tipo_movimientos/{id}:
+    delete:
+      summary: Eliminar tipo de movimiento
+      description: Elimina un tipo de movimiento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
-          description: Lista de estados de orden obtenida exitosamente
+          description: Tipo de movimiento eliminado exitosamente
           content:
             application/json:
               schema:
@@ -1298,33 +1341,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Estados encontrados correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        nombre:
-                          type: string
-                          maxLength: 45
-                        descripcion:
-                          type: string
-                          maxLength: 255
-        '404':
-          description: No se encontraron estados de orden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  statusCode:
-                    type: integer
-                    example: 404
-                  message:
-                    type: string
-                    example: "No hay estados disponibles"
+                    example: "Tipo de movimiento eliminado correctamente"
 
   /post/login:
     post:
@@ -1665,13 +1682,13 @@ paths:
                     type: string
                     example: "No se encontraron asistencias en el rango especificado"
 
-  /GET/movimientos:
+  /GET/ordenes/estados_ordenes_detalles:
     get:
-      summary: Obtener todos los movimientos
-      description: Obtiene una lista de todos los movimientos
+      summary: Obtener todos los estados de detalle
+      description: Obtiene una lista de todos los estados posibles para los detalles de órdenes
       responses:
         '200':
-          description: Lista de movimientos obtenida exitosamente
+          description: Lista de estados de detalle obtenida exitosamente
           content:
             application/json:
               schema:
@@ -1679,7 +1696,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Movimientos encontrados correctamente"
+                    example: "Estados encontrados correctamente"
                   data:
                     type: array
                     items:
@@ -1687,18 +1704,113 @@ paths:
                       properties:
                         id:
                           type: integer
-                        concepto:
+                        nombre:
                           type: string
-                        cantidad:
-                          type: number
-                        fecha_movimiento:
+                        descripcion:
                           type: string
-                          format: date-time
+        '404':
+          description: No se encontraron estados de detalle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No hay estados disponibles"
 
-  /GET/movimientos/{id}:
+  /GET/ordenes/estados_ordenes:
     get:
-      summary: Obtener movimiento por ID
-      description: Obtiene un movimiento específico por su ID
+      summary: Obtener todos los estados de orden
+      description: Obtiene una lista de todos los estados posibles para las órdenes
+      responses:
+        '200':
+          description: Lista de estados de orden obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Estados encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                        descripcion:
+                          type: string
+        '404':
+          description: No se encontraron estados de orden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No hay estados disponibles"
+
+  /GET/servicios:
+    get:
+      summary: Obtener todos los servicios
+      description: Obtiene una lista de todos los servicios activos en el sistema
+      responses:
+        '200':
+          description: Lista de servicios obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Servicios encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                          maxLength: 45
+                        descripcion:
+                          type: string
+                          maxLength: 150
+                        estado:
+                          type: boolean
+                          default: true
+        '404':
+          description: No se encontraron servicios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No hay servicios disponibles"
+
+  /GET/servicios/{id}:
+    get:
+      summary: Obtener servicio por ID
+      description: Obtiene un servicio específico por su ID
       parameters:
         - name: id
           in: path
@@ -1707,7 +1819,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Movimiento encontrado exitosamente
+          description: Servicio encontrado exitosamente
           content:
             application/json:
               schema:
@@ -1715,39 +1827,41 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Movimiento encontrado correctamente"
+                    example: "Servicio encontrado correctamente"
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                      concepto:
+                      nombre:
                         type: string
-                      cantidad:
-                        type: number
-                      fecha_movimiento:
+                        maxLength: 45
+                      descripcion:
                         type: string
-                        format: date-time
+                        maxLength: 150
+                      estado:
+                        type: boolean
+        '404':
+          description: Servicio no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Servicio no encontrado"
 
-  /GET/movimientos/diarios:
+  /GET/roles:
     get:
-      summary: Obtener movimientos diarios
-      description: Obtiene los movimientos de un día específico
-      parameters:
-        - name: fecha
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: id_servicio
-          in: query
-          required: false
-          schema:
-            type: integer
+      summary: Obtener todos los roles
+      description: Obtiene una lista de todos los roles disponibles en el sistema
       responses:
         '200':
-          description: Movimientos diarios encontrados exitosamente
+          description: Lista de roles obtenida exitosamente
           content:
             application/json:
               schema:
@@ -1755,226 +1869,36 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Roles encontrados correctamente"
                   data:
                     type: array
                     items:
                       type: object
-
-  /GET/movimientos/mensuales:
-    get:
-      summary: Obtener movimientos mensuales
-      description: Obtiene los movimientos de un mes específico
-      parameters:
-        - name: mes
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 12
-        - name: año
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 2000
-            maximum: 2100
-        - name: id_servicio
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Movimientos mensuales encontrados exitosamente
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                        descripcion:
+                          type: string
+        '404':
+          description: No se encontraron roles
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  statusCode:
+                    type: integer
+                    example: 404
                   message:
                     type: string
-                  data:
-                    type: array
-                    items:
-                      type: object
+                    example: "No hay roles disponibles"
 
-  /GET/movimientos/trimestrales:
-    get:
-      summary: Obtener movimientos trimestrales
-      description: Obtiene los movimientos de un trimestre específico
-      parameters:
-        - name: trimestre
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 4
-        - name: año
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 2000
-            maximum: 2100
-        - name: id_servicio
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Movimientos trimestrales encontrados exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  data:
-                    type: array
-                    items:
-                      type: object
-
-  /GET/movimientos/semestrales:
-    get:
-      summary: Obtener movimientos semestrales
-      description: Obtiene los movimientos de un semestre específico
-      parameters:
-        - name: semestre
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 2
-        - name: año
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 2000
-            maximum: 2100
-        - name: id_servicio
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Movimientos semestrales encontrados exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  data:
-                    type: array
-                    items:
-                      type: object
-
-  /GET/movimientos/anuales:
-    get:
-      summary: Obtener movimientos anuales
-      description: Obtiene los movimientos de un año específico
-      parameters:
-        - name: año
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 2000
-            maximum: 2100
-        - name: id_servicio
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Movimientos anuales encontrados exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  data:
-                    type: array
-                    items:
-                      type: object
-
-  /POST/pagar-salarios:
+  /POST/roles:
     post:
-      summary: Pagar salarios
-      description: Realiza el pago de salarios a los empleados
-      responses:
-        '200':
-          description: Salarios pagados exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Salarios pagados correctamente"
-                  data:
-                    type: object
-
-  /GET/tipo_movimientos:
-    get:
-      summary: Obtener todos los tipos de movimiento
-      description: Obtiene una lista de todos los tipos de movimiento
-      responses:
-        '200':
-          description: Lista de tipos de movimiento obtenida exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Tipos de movimiento encontrados correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-
-  /GET/tipo_movimientos/{id}:
-    get:
-      summary: Obtener tipo de movimiento por ID
-      description: Obtiene un tipo de movimiento específico por su ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Tipo de movimiento encontrado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Tipo de movimiento encontrado correctamente"
-                  data:
-                    type: object
-
-  /POST/tipo_movimientos:
-    post:
-      summary: Crear tipo de movimiento
-      description: Crea un nuevo tipo de movimiento
+      summary: Crear rol
+      description: Crea un nuevo rol en el sistema
       requestBody:
         required: true
         content:
@@ -1984,14 +1908,27 @@ paths:
               required:
                 - nombre
                 - descripcion
+                - salario
               properties:
                 nombre:
                   type: string
+                  minLength: 5
+                  maxLength: 45
                 descripcion:
                   type: string
+                  minLength: 5
+                  maxLength: 200
+                salario:
+                  type: integer
+                  minimum: 0
+                  maximum: 1000000
+                id_rol_superior:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000000
       responses:
         '201':
-          description: Tipo de movimiento creado exitosamente
+          description: Rol creado exitosamente
           content:
             application/json:
               schema:
@@ -1999,14 +1936,200 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Tipo de movimiento creado correctamente"
+                    example: "Rol creado correctamente"
                   data:
                     type: object
 
-  /PATCH/tipo_movimientos/{id}:
-    patch:
-      summary: Actualizar tipo de movimiento
-      description: Actualiza un tipo de movimiento existente
+  /GET/jornadas:
+    get:
+      summary: Obtener todas las jornadas
+      description: Obtiene una lista de todas las jornadas laborales disponibles
+      responses:
+        '200':
+          description: Lista de jornadas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Jornadas encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombre:
+                          type: string
+                          minLength: 3
+                          maxLength: 45
+                        hora_inicio:
+                          type: string
+                          pattern: "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+                        hora_fin:
+                          type: string
+                          pattern: "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+        '404':
+          description: No se encontraron jornadas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No hay jornadas disponibles"
+
+  /POST/reembolsos:
+    post:
+      summary: Crear reembolso
+      description: Crea un nuevo reembolso en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - concepto
+                - cantidad
+                - fecha_movimiento
+                - id_servicio
+              properties:
+                concepto:
+                  type: string
+                  minLength: 5
+                  maxLength: 150
+                cantidad:
+                  type: number
+                  minimum: 0
+                fecha_movimiento:
+                  type: string
+                  format: date-time
+                id_servicio:
+                  type: integer
+      responses:
+        '201':
+          description: Reembolso creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reembolso creado correctamente"
+                  data:
+                    type: object
+
+  /GET/proveedores:
+    get:
+      summary: Obtener todos los proveedores
+      description: Obtiene una lista de todos los proveedores activos
+      responses:
+        '200':
+          description: Lista de proveedores obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Proveedores encontrados correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nombres:
+                          type: string
+                          minLength: 3
+                          maxLength: 100
+                        apellidos:
+                          type: string
+                          minLength: 3
+                          maxLength: 100
+                        telefono:
+                          type: integer
+                          minimum: 10000000
+                          maximum: 99999999
+                        nit:
+                          type: string
+                          minLength: 9
+                          maxLength: 13
+        '404':
+          description: No se encontraron proveedores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "No hay proveedores disponibles"
+
+  /POST/proveedores:
+    post:
+      summary: Crear proveedor
+      description: Crea un nuevo proveedor en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombres
+                - apellidos
+                - telefono
+                - nit
+              properties:
+                nombres:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                apellidos:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                telefono:
+                  type: integer
+                  minimum: 10000000
+                  maximum: 99999999
+                nit:
+                  type: string
+                  minLength: 9
+                  maxLength: 13
+      responses:
+        '201':
+          description: Proveedor creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Proveedor creado correctamente"
+                  data:
+                    type: object
+
+  /PUT/proveedores/{id}:
+    put:
+      summary: Actualizar proveedor
+      description: Actualiza un proveedor existente
       parameters:
         - name: id
           in: path
@@ -2020,13 +2143,25 @@ paths:
             schema:
               type: object
               properties:
-                nombre:
+                nombres:
                   type: string
-                descripcion:
+                  minLength: 3
+                  maxLength: 100
+                apellidos:
                   type: string
+                  minLength: 3
+                  maxLength: 100
+                telefono:
+                  type: integer
+                  minimum: 10000000
+                  maximum: 99999999
+                nit:
+                  type: string
+                  minLength: 9
+                  maxLength: 13
       responses:
         '200':
-          description: Tipo de movimiento actualizado exitosamente
+          description: Proveedor actualizado exitosamente
           content:
             application/json:
               schema:
@@ -2034,14 +2169,14 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Tipo de movimiento actualizado correctamente"
+                    example: "Proveedor actualizado correctamente"
                   data:
                     type: object
 
-  /DELETE/tipo_movimientos/{id}:
+  /DELETE/proveedores/{id}:
     delete:
-      summary: Eliminar tipo de movimiento
-      description: Elimina un tipo de movimiento
+      summary: Eliminar proveedor
+      description: Elimina un proveedor del sistema
       parameters:
         - name: id
           in: path
@@ -2050,7 +2185,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Tipo de movimiento eliminado exitosamente
+          description: Proveedor eliminado exitosamente
           content:
             application/json:
               schema:
@@ -2058,5 +2193,5 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Tipo de movimiento eliminado correctamente"
+                    example: "Proveedor eliminado correctamente"
 
