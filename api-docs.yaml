@@ -3,10 +3,6 @@ info:
   title: API de Administración y Contabilidad
   description: API para la gestión de alertas y proveedores en el sistema
   version: 1.0.0
-info:
-  title: API de Administración y Contabilidad
-  description: API para la gestión de alertas y proveedores en el sistema
-  version: 1.0.0
 servers:
   - url: http://localhost:3000/administracion
     description: Servidor de desarrollo
@@ -924,32 +920,103 @@ paths:
   /GET/movimientos:
     get:
       summary: Obtener todos los movimientos
-      description: Obtiene una lista de todos los movimientos
+      description: Obtiene una lista de todos los movimientos agrupados por tipo con datos externos incluidos
       responses:
         '200':
-          description: Lista de movimientos obtenida exitosamente
+          description: Movimientos encontrados exitosamente
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
-                    example: "Movimientos encontrados correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        concepto:
-                          type: string
-                        cantidad:
-                          type: number
-                        fecha_movimiento:
-                          type: string
-                          format: date-time
+                  Pago de salarios:
+                    type: object
+                    properties:
+                      total_monetario:
+                        type: number
+                      movimientos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            concepto:
+                              type: string
+                            cantidad:
+                              type: number
+                            fecha_movimiento:
+                              type: string
+                            id_servicio:
+                              type: integer
+                            nombre_empleado:
+                              type: string
+                  Compras:
+                    type: object
+                    properties:
+                      total_monetario:
+                        type: number
+                      movimientos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            concepto:
+                              type: string
+                            cantidad:
+                              type: number
+                            fecha_movimiento:
+                              type: string
+                            id_servicio:
+                              type: integer
+                            id_producto:
+                              type: integer
+                  Ventas:
+                    type: object
+                    properties:
+                      total_monetario:
+                        type: number
+                      movimientos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            concepto:
+                              type: string
+                            cantidad:
+                              type: number
+                            fecha_movimiento:
+                              type: string
+                              format: date
+                            id_servicio:
+                              type: integer
+                            producto:
+                              type: string
+                  Devoluciones:
+                    type: object
+                    properties:
+                      total_monetario:
+                        type: number
+                      movimientos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            concepto:
+                              type: string
+                            cantidad:
+                              type: number
+                            fecha_movimiento:
+                              type: string
+                              format: date
+                            NotaCredito:
+                              type: string
 
   /GET/movimientos/{id}:
     get:
@@ -1197,8 +1264,8 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Tipos de movimiento encontrados correctamente"
-                  data:
+                    example: "Tipos de movimientos encontrados"
+                  tipo_movimientos:
                     type: array
                     items:
                       type: object
@@ -1248,8 +1315,30 @@ paths:
                   message:
                     type: string
                     example: "Tipo de movimiento encontrado correctamente"
-                  data:
+                  tipo_movimiento:
                     type: object
+                    properties:
+                      id:
+                        type: integer
+                      nombre:
+                        type: string
+                      descripcion:
+                        type: string
+                      estado:
+                        type: boolean
+        '404':
+          description: Tipo de movimiento no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Tipo de movimiento no encontrado"
 
   /POST/tipo_movimientos:
     post:
@@ -1305,8 +1394,12 @@ paths:
               properties:
                 nombre:
                   type: string
+                  maxLength: 50
                 descripcion:
                   type: string
+                  maxLength: 150
+                estado:
+                  type: boolean
       responses:
         '200':
           description: Tipo de movimiento actualizado exitosamente
@@ -1317,7 +1410,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Tipo de movimiento actualizado correctamente"
+                    example: "Tipo de movimiento actualizado"
                   data:
                     type: object
 
@@ -1341,7 +1434,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Tipo de movimiento eliminado correctamente"
+                    example: "Tipo de movimiento eliminado"
 
   /post/login:
     post:
@@ -1594,6 +1687,20 @@ paths:
           schema:
             type: integer
           description: ID del empleado
+        - name: fecha_inicio
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Fecha inicial del rango
+        - name: fecha_fin
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Fecha final del rango
       responses:
         '200':
           description: Asistencias encontradas exitosamente
@@ -2177,6 +2284,278 @@ paths:
     delete:
       summary: Eliminar proveedor
       description: Elimina un proveedor del sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Proveedor eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Proveedor eliminado correctamente"
+
+  /GET/jornadas/{id}:
+    get:
+      summary: Obtener jornada por ID
+      description: Obtiene una jornada específica por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Jornada encontrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Jornada encontrada correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      nombre:
+                        type: string
+                        minLength: 3
+                        maxLength: 45
+                      hora_inicio:
+                        type: string
+                        pattern: "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+                      hora_fin:
+                        type: string
+                        pattern: "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+        '404':
+          description: Jornada no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Jornada no encontrada"
+
+  /GET/roles/{id}:
+    get:
+      summary: Obtener rol por ID
+      description: Obtiene un rol específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rol encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rol encontrado correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      nombre:
+                        type: string
+                      descripcion:
+                        type: string
+                      salario:
+                        type: integer
+        '404':
+          description: Rol no encontrado
+
+  /PUT/roles/{id}:
+    put:
+      summary: Actualizar rol
+      description: Actualiza un rol existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  minLength: 5
+                  maxLength: 45
+                descripcion:
+                  type: string
+                  minLength: 5
+                  maxLength: 200
+                salario:
+                  type: integer
+                  minimum: 0
+                  maximum: 1000000
+                id_rol_superior:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000000
+      responses:
+        '200':
+          description: Rol actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rol actualizado correctamente"
+                  data:
+                    type: object
+
+  /PATCH/roles/{id}:
+    patch:
+      summary: Eliminar rol
+      description: Marca un rol como eliminado (inactivo)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rol eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rol eliminado correctamente"
+
+  /GET/inasistencias/empleado/{id}:
+    get:
+      summary: Obtener inasistencias por empleado
+      description: Obtiene el registro de inasistencias de un empleado específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del empleado
+        - name: fecha_inicio
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Fecha inicial del rango
+        - name: fecha_fin
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Fecha final del rango
+      responses:
+        '200':
+          description: Inasistencias encontradas exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Inasistencias encontradas correctamente"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        fecha:
+                          type: string
+                          format: date
+                        motivo:
+                          type: string
+        '404':
+          description: No se encontraron inasistencias
+
+  /GET/proveedores/{id}:
+    get:
+      summary: Obtener proveedor por ID
+      description: Obtiene un proveedor específico por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Proveedor encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Proveedor encontrado correctamente"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      nombres:
+                        type: string
+                        minLength: 3
+                        maxLength: 100
+                      apellidos:
+                        type: string
+                        minLength: 3
+                        maxLength: 100
+                      telefono:
+                        type: integer
+                        minimum: 10000000
+                        maximum: 99999999
+                      nit:
+                        type: string
+                        minLength: 9
+                        maxLength: 13
+        '404':
+          description: Proveedor no encontrado
+
+  /PATCH/proveedores/{id}:
+    patch:
+      summary: Eliminar proveedor
+      description: Marca un proveedor como eliminado (inactivo)
       parameters:
         - name: id
           in: path
