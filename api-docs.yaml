@@ -1927,55 +1927,13 @@ paths:
                   data:
                     type: object
 
-  /POST/reembolsos:
-    post:
-      summary: Crear reembolso
-      description: Crea un nuevo reembolso en el sistema
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - concepto
-                - cantidad
-                - fecha_movimiento
-                - id_servicio
-              properties:
-                concepto:
-                  type: string
-                  minLength: 5
-                  maxLength: 150
-                cantidad:
-                  type: number
-                  minimum: 0
-                fecha_movimiento:
-                  type: string
-                  format: date-time
-                id_servicio:
-                  type: integer
-      responses:
-        '201':
-          description: Reembolso creado exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Reembolso creado correctamente"
-                  data:
-                    type: object
-
-  /GET/estados_ordenes:
+  /GET/tipo_movimientos:
     get:
-      summary: Obtener estados de orden
-      description: Obtiene una lista de todos los estados posibles para las órdenes
+      summary: Obtener todos los tipos de movimiento
+      description: Obtiene una lista de todos los tipos de movimiento
       responses:
         '200':
-          description: Estados de orden obtenidos exitosamente
+          description: Lista de tipos de movimiento obtenida exitosamente
           content:
             application/json:
               schema:
@@ -1983,77 +1941,16 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Estados de orden encontrados correctamente"
+                    example: "Tipos de movimiento encontrados correctamente"
                   data:
                     type: array
                     items:
                       type: object
-                      properties:
-                        id:
-                          type: integer
-                        nombre:
-                          type: string
-                        descripcion:
-                          type: string
 
-  /GET/estados_ordenes_detalles:
+  /GET/tipo_movimientos/{id}:
     get:
-      summary: Obtener estados de detalle de orden
-      description: Obtiene una lista de todos los estados posibles para los detalles de órdenes
-      responses:
-        '200':
-          description: Estados de detalle obtenidos exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Estados de detalle encontrados correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        nombre:
-                          type: string
-                        descripcion:
-                          type: string
-
-  /GET/servicios:
-    get:
-      summary: Obtener servicios
-      description: Obtiene una lista de todos los servicios disponibles
-      responses:
-        '200':
-          description: Servicios obtenidos exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Servicios encontrados correctamente"
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        nombre:
-                          type: string
-                        descripcion:
-                          type: string
-
-  /GET/servicios/{id}:
-    get:
-      summary: Obtener servicio por ID
-      description: Obtiene un servicio específico por su ID
+      summary: Obtener tipo de movimiento por ID
+      description: Obtiene un tipo de movimiento específico por su ID
       parameters:
         - name: id
           in: path
@@ -2062,7 +1959,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Servicio encontrado exitosamente
+          description: Tipo de movimiento encontrado exitosamente
           content:
             application/json:
               schema:
@@ -2070,16 +1967,96 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Servicio encontrado correctamente"
+                    example: "Tipo de movimiento encontrado correctamente"
                   data:
                     type: object
-                    properties:
-                      id:
-                        type: integer
-                      nombre:
-                        type: string
-                      descripcion:
-                        type: string
-        '404':
-          description: Servicio no encontrado
+
+  /POST/tipo_movimientos:
+    post:
+      summary: Crear tipo de movimiento
+      description: Crea un nuevo tipo de movimiento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - descripcion
+              properties:
+                nombre:
+                  type: string
+                descripcion:
+                  type: string
+      responses:
+        '201':
+          description: Tipo de movimiento creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Tipo de movimiento creado correctamente"
+                  data:
+                    type: object
+
+  /PATCH/tipo_movimientos/{id}:
+    patch:
+      summary: Actualizar tipo de movimiento
+      description: Actualiza un tipo de movimiento existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                descripcion:
+                  type: string
+      responses:
+        '200':
+          description: Tipo de movimiento actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Tipo de movimiento actualizado correctamente"
+                  data:
+                    type: object
+
+  /DELETE/tipo_movimientos/{id}:
+    delete:
+      summary: Eliminar tipo de movimiento
+      description: Elimina un tipo de movimiento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tipo de movimiento eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Tipo de movimiento eliminado correctamente"
 

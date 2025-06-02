@@ -37,7 +37,7 @@ class MovimientosService {
       movs.filter(m => m.id_tipo_movimiento === 2).map(async compra => {
         try {
           const ordenId = compra.concepto.split(' ').pop();
-          const { data } = await axios.get(`http://localhost:3000/administracion/GET/ordenes/${ordenId}`);
+          const { data } = await axios.get(`http://64.23.169.22:3000/administracion/GET/ordenes/${ordenId}`);
           const detalles = data.orden?.orden_detalles || [];
           return detalles.length
             ? detalles.map(det => ({
@@ -340,7 +340,7 @@ class MovimientosService {
     ));
     let ordenes;
     try {
-      const { data } = await axios.get('http://localhost:3000/administracion/GET/ordenes', { params: { desde, hasta } });
+      const { data } = await axios.get('http://64.23.169.22:3000/administracion/GET/ordenes', { params: { desde, hasta } });
       ordenes = Array.isArray(data.ordenes) ? data.ordenes : [];
     } catch {
       throw boom.badGateway('No se pudo obtener datos del microservicio de órdenes');
