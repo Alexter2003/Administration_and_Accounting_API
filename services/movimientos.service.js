@@ -72,70 +72,70 @@ class MovimientosService {
     // Ventas y devoluciones externas solo si se piden
     let ventasExternas = [], devolucionesExternas = [];
     if (incluirExternos) {
-      const [transResp, devolResp] = await Promise.all([
-        axios.get('http://64.23.169.22:3001/pagos/transacciones/obtener'),
-        axios.get('http://64.23.169.22:3001/pagos/devoluciones/obtener')
-      ]);
-      const transacciones = (transResp.data.Transacciones || []).filter(tx => tx.Estado === 1);
+  const [transResp, devolResp] = await Promise.all([
+    axios.post('http://64.23.169.22:3001/pagos/transacciones/obtener', {}), // Cambiado a POST
+    axios.post('http://64.23.169.22:3001/pagos/devoluciones/obtener', {})   // Cambiado a POST
+  ]);
+  const transacciones = (transResp.data.Transacciones || []).filter(tx => tx.Estado === 1);
 
-      devolucionesExternas = (devolResp.data.Devoluciones || [])
-        .filter(dev => dev.Estado === 1)
-        .filter(dev => {
-          const fechaDev = this.soloFecha(dev.Fecha);
-          if (!fechaDev) return false;
-          let fechaOk = true, servicioOk = true;
-          if (fechaInicio && fechaFin) {
-            const inicio = this.soloFecha(fechaInicio);
-            const fin = this.soloFecha(fechaFin);
-            if (inicio.getTime() === fin.getTime()) {
-              fechaOk = fechaDev.getTime() === inicio.getTime();
-            } else {
-              fechaOk = fechaDev.getTime() >= inicio.getTime() && fechaDev.getTime() <= fin.getTime();
-            }
-          }
-          if (id_servicio) servicioOk = dev.id_servicio == id_servicio;
-          return fechaOk && servicioOk;
-        })
-        .map(dev => ({
-          id: dev.NoDevolucion,
-          concepto: dev.Descripcion || "Devolución",
-          cantidad: dev.Monto,
-          fecha_movimiento: new Date(dev.Fecha).toISOString().split('T')[0],
-          NotaCredito: dev.NotaCredito
-        }));
-
-      ventasExternas = [];
-      await Promise.all(transacciones.filter(tx => tx.NoFactura).map(async tx => {
-        const fechaTx = this.soloFecha(tx.Fecha);
-        if (!fechaTx) return;
-        let fechaOk = true, servicioOk = true;
-        if (fechaInicio && fechaFin) {
-          const inicio = this.soloFecha(fechaInicio);
-          const fin = this.soloFecha(fechaFin);
-          if (inicio.getTime() === fin.getTime()) {
-            fechaOk = fechaTx.getTime() === inicio.getTime();
-          } else {
-            fechaOk = fechaTx.getTime() >= inicio.getTime() && fechaTx.getTime() <= fin.getTime();
-          }
+  devolucionesExternas = (devolResp.data.Devoluciones || [])
+    .filter(dev => dev.Estado === 1)
+    .filter(dev => {
+      const fechaDev = this.soloFecha(dev.Fecha);
+      if (!fechaDev) return false;
+      let fechaOk = true, servicioOk = true;
+      if (fechaInicio && fechaFin) {
+        const inicio = this.soloFecha(fechaInicio);
+        const fin = this.soloFecha(fechaFin);
+        if (inicio.getTime() === fin.getTime()) {
+          fechaOk = fechaDev.getTime() === inicio.getTime();
+        } else {
+          fechaOk = fechaDev.getTime() >= inicio.getTime() && fechaDev.getTime() <= fin.getTime();
         }
-        if (id_servicio) servicioOk = tx.ServiciosTransaccion == id_servicio;
-        if (!fechaOk || !servicioOk) return;
-        try {
-          const factura = (await axios.get(`http://64.23.169.22:3001/pagos/facturas/obtener/${tx.NoFactura}`)).data.factura;
-          (factura?.Detalle || []).forEach(prod => {
-            ventasExternas.push({
-              id: tx.NoTransaccion,
-              concepto: tx.NoFactura,
-              cantidad: prod.Precio * prod.Cantidad,
-              fecha_movimiento: new Date(tx.Fecha).toISOString().split('T')[0],
-              id_servicio: tx.ServiciosTransaccion,
-              producto: prod.Producto
-            });
-          });
-        } catch {}
-      }));
-      ventasExternas.sort((a, b) => a.concepto.localeCompare(b.concepto));
+      }
+      if (id_servicio) servicioOk = dev.id_servicio == id_servicio;
+      return fechaOk && servicioOk;
+    })
+    .map(dev => ({
+      id: dev.NoDevolucion,
+      concepto: dev.Descripcion || "Devolución",
+      cantidad: dev.Monto,
+      fecha_movimiento: new Date(dev.Fecha).toISOString().split('T')[0],
+      NotaCredito: dev.NotaCredito
+    }));
+
+  ventasExternas = [];
+  await Promise.all(transacciones.filter(tx => tx.NoFactura).map(async tx => {
+    const fechaTx = this.soloFecha(tx.Fecha);
+    if (!fechaTx) return;
+    let fechaOk = true, servicioOk = true;
+    if (fechaInicio && fechaFin) {
+      const inicio = this.soloFecha(fechaInicio);
+      const fin = this.soloFecha(fechaFin);
+      if (inicio.getTime() === fin.getTime()) {
+        fechaOk = fechaTx.getTime() === inicio.getTime();
+      } else {
+        fechaOk = fechaTx.getTime() >= inicio.getTime() && fechaTx.getTime() <= fin.getTime();
+      }
     }
+    if (id_servicio) servicioOk = tx.ServiciosTransaccion == id_servicio;
+    if (!fechaOk || !servicioOk) return;
+    try {
+      const factura = (await axios.get(`http://64.23.169.22:3001/pagos/facturas/obtener/${tx.NoFactura}`)).data.factura;
+      (factura?.Detalle || []).forEach(prod => {
+        ventasExternas.push({
+          id: tx.NoTransaccion,
+          concepto: tx.NoFactura,
+          cantidad: prod.Precio * prod.Cantidad,
+          fecha_movimiento: new Date(tx.Fecha).toISOString().split('T')[0],
+          id_servicio: tx.ServiciosTransaccion,
+          producto: prod.Producto
+        });
+      });
+    } catch {}
+  }));
+  ventasExternas.sort((a, b) => a.concepto.localeCompare(b.concepto));
+}
 
     return this.agruparMovimientos(
       movs.filter(m => m.id_tipo_movimiento !== 2),

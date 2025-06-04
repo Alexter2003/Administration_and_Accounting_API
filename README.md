@@ -57,6 +57,10 @@ Para aplicar las migraciones de la base de datos,
  npm run migrations:run
 ```
 
+```bash
+ npx sequelize-cli db:seed:all
+```
+
 ## DESPLIEGUE CON DOCKER COMPOSE
 **Nota:** Si necesitas conectarte a la base de datos PostgreSQL desde fuera de Docker Compose (por ejemplo, usando PgAdmin o DBeaver), usa el puerto 5440 del host.
 
@@ -65,12 +69,4 @@ Para aplicar las migraciones de la base de datos,
 ```bash
  docker-compose up -d
 ```
-3. Ejecuta las migraciones dentro del contenedor:
-```bash
- docker-compose exec app npm run migrations:run
-```
-4. Ejecuta los seeders dentro del contenedor:
-```bash
- docker-compose exec app npx sequelize-cli db:seed:all
-```
-5. El servicio estará disponible en http://localhost:3000 (o en la IP del servidor).
+3. El servicio estará disponible en http://localhost:3000 (o en la IP del servidor).
