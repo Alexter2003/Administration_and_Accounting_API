@@ -4,7 +4,7 @@ const id = Joi.number().integer();
 const nombres = Joi.string().min(3).max(100);
 const apellidos = Joi.string().min(3).max(100);
 const telefono = Joi.number().integer().max(99999999).min(10000000);
-const nit = joi.string();
+const nit = Joi.string();
 //const estado = Joi.boolean();
 
 const getProveedorSchema = Joi.object({
