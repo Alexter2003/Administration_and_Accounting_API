@@ -69,6 +69,43 @@ class MovimientosService {
       })
     );
 
+    // Ahora obtenemos ventas del endpoint y las guardamos si son nuevas
+    let ventasExternasNuevas = [];
+    try {
+      // Obtenemos ventas externas del endpoint
+      const ventasResp = await axios.post('http://64.23.169.22:3001/pagos/transacciones/obtener', {});
+      const ventasExternas = (ventasResp.data.Transacciones || []).filter(tx => tx.Estado === 1 && tx.NoFactura);
+
+      // Para cada venta, revisa si ya existe en la base de datos (por NoFactura)
+      for (const venta of ventasExternas) {
+        // Consideramos que el campo concepto será "Venta externa NoFactura: {NoFactura}"
+        const conceptoVenta = `Venta externa NoFactura: ${venta.NoFactura}`;
+        // Busca si ya existe un movimiento con ese concepto y tipo de movimiento 3 (por ejemplo)
+        const existe = await models.Movimiento.findOne({
+          where: {
+            concepto: conceptoVenta,
+            id_tipo_movimiento: 4,
+            estado: true
+          }
+        });
+        if (!existe) {
+          // Si no existe, la guardamos
+          const nuevaVenta = await models.Movimiento.create({
+            concepto: conceptoVenta,
+            cantidad: Number(venta.Total),
+            fecha_movimiento: new Date(venta.Fecha),
+            id_servicio: venta.id_servicio || 3,
+            id_tipo_movimiento: 4,
+            estado: true
+          });
+          ventasExternasNuevas.push(nuevaVenta);
+        }
+      }
+    } catch (err) {
+      // Si hay error, solo loguea, no detiene el flujo
+      console.error('Error obteniendo o guardando ventas externas:', err.message);
+    }
+
     // Ventas y devoluciones externas solo si se piden
     let ventasExternas = [], devolucionesExternas = [];
     if (incluirExternos) {
