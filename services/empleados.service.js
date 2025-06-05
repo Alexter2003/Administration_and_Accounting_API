@@ -198,44 +198,53 @@ class EmpleadosService {
   }
 
   async update(id, data) {
-    const { empleado: empleadoData = {}, asignacion: asignacionData = {} } = data;
+  const { empleado: empleadoData = {}, asignacion: asignacionData = {} } = data;
 
-    const empleado = await models.Empleado.findByPk(id, {
-      include: [
-        {
-          model: models.EmpleadoAsignacion,
-          as: 'empleado_asignacion',
-          include: [
-            { model: models.Rol, as: 'rol' },
-            { model: models.Areas, as: 'area' },
-          ],
-        },
-      ],
+  const empleadoActual = await models.Empleado.findByPk(id, {
+    include: [
+      {
+        model: models.EmpleadoAsignacion,
+        as: 'empleado_asignacion',
+        include: [
+          { model: models.Rol, as: 'rol' },
+          { model: models.Areas, as: 'area' },
+        ],
+      },
+    ],
+  });
+
+  if (!empleadoActual) throw boom.notFound('Empleado no encontrado');
+
+  // Filtrar solo los campos que han cambiado
+  const datosActualizados = {};
+  Object.keys(empleadoData).forEach(campo => {
+    if (empleadoData[campo] !== undefined && empleadoData[campo] !== empleadoActual[campo]) {
+      datosActualizados[campo] = empleadoData[campo];
+    }
+  });
+
+  // Validar campos únicos solo si han cambiado
+  if (Object.keys(datosActualizados).length > 0) {
+    await validarCamposUnicos(datosActualizados, id);
+    await empleadoActual.update(datosActualizados);
+  }
+
+  // Actualizar asignación si se envió
+  if (Object.keys(asignacionData).length > 0) {
+    const asignacion = await models.EmpleadoAsignacion.findOne({
+      where: { id_empleado: id },
     });
 
-    if (!empleado) throw boom.notFound('Empleado no encontrado');
-
-    await validarCamposUnicos(empleadoData, id);
-
-    if (Object.keys(empleadoData).length > 0) {
-      await empleado.update(empleadoData);
-    }
-
-    if (Object.keys(asignacionData).length > 0) {
-      const asignacion = await models.EmpleadoAsignacion.findOne({
-        where: { id_empleado: id },
+    if (asignacion) {
+      await asignacion.update(asignacionData);
+    } else {
+      await models.EmpleadoAsignacion.create({
+        id_empleado: id,
+        ...asignacionData,
+        estado: true,
       });
-
-      if (asignacion) {
-        await asignacion.update(asignacionData);
-      } else {
-        await models.EmpleadoAsignacion.create({
-          id_empleado: id,
-          ...asignacionData,
-          estado: true,
-        });
-      }
     }
+  }
 
     return { message: 'Empleado actualizado correctamente' };
   }
