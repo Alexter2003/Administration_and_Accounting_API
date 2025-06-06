@@ -2,20 +2,40 @@ const MovimientosService = require('../../services/movimientos.service');
 const service = new MovimientosService();
 
 class MovimientosController {
-async findAll(req, res, next) {
-  try {
-    const resultado = await service.findAll();
-    res.status(200).json(resultado);
-  } catch (error) {
-    next(error);
+  async findAll(req, res, next) {
+    try {
+      const resultado = await service.findAll();
+      res.status(200).json(resultado);
+    } catch (error) {
+      next(error);
+    }
   }
-}
-
 
   async findOne(req, res, next) {
     try {
       const { id } = req.params;
       const resultado = await service.findOne(id);
+      res.status(200).json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Nuevo método para obtener resumen por tipo usando vista SQL
+  async getResumenPorTipo(req, res, next) {
+    try {
+      const resultado = await service.getResumenPorTipo();
+      res.status(200).json(resultado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Nuevo método para obtener movimientos por tipo usando función SQL
+  async getMovimientosPorTipo(req, res, next) {
+    try {
+      const { tipoId } = req.params;
+      const resultado = await service.obtenerMovimientosPorTipo(parseInt(tipoId));
       res.status(200).json(resultado);
     } catch (error) {
       next(error);
@@ -80,8 +100,6 @@ async findAll(req, res, next) {
       next(error);
     }
   }
-
-
 }
 
 module.exports = MovimientosController;

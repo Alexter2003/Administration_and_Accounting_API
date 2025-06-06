@@ -7,17 +7,23 @@ const {
   getMensualesSchema,
   getTrimestralesSchema,
   getSemestralesSchema,
-  getAnualesSchema,
-  getMovimientosQuerySchema,
-  getOrdenesSchema,
-  getVentasSchema 
-
+  getAnualesSchema
 } = require('../../Schemas/movimientos.schema');
 
 
 const router = express.Router();
 const ctrl   = new MovimientosController();
 
+// Nuevas rutas que usan las vistas SQL
+router.get(
+  '/GET/movimientos/resumen-por-tipo',
+  (req, res, next) => ctrl.getResumenPorTipo(req, res, next)
+);
+
+router.get(
+  '/GET/movimientos/por-tipo/:tipoId',
+  (req, res, next) => ctrl.getMovimientosPorTipo(req, res, next)
+);
 
 router.get(
   '/GET/movimientos/diarios',
